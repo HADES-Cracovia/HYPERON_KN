@@ -50,9 +50,9 @@ double trackDistance(HParticleCand* track1, HFwDetCand*  track2)
 
   p_tool.calcSegVector(track1->getZ(),track1->getR(),TMath::DegToRad()*track1->getPhi(),TMath::DegToRad()*track1->getTheta(),base_1,dir_1);
 
-  base_2.setX(track2->getPointX());
-  base_2.setY(track2->getPointY());
-  base_2.setZ(track2->getPointZ());
+  base_2.setX(track2->getBaseX());
+  base_2.setY(track2->getBaseY());
+  base_2.setZ(track2->getBaseZ());
   dir_2.setX(track2->getDirTx());
   dir_2.setY(track2->getDirTy());
   dir_2.setZ(1);//konwencja, tak jest ustawione w fwdetstrawvec
@@ -81,9 +81,9 @@ HGeomVector trackVertex(HParticleCand* track1, HFwDetCand*  track2)
 
   p_tool.calcSegVector(track1->getZ(),track1->getR(),TMath::DegToRad()*track1->getPhi(),TMath::DegToRad()*track1->getTheta(),base_1,dir_1);
 
-  base_2.setX(track2->getPointX());
-  base_2.setY(track2->getPointY());
-  base_2.setZ(track2->getPointZ());
+  base_2.setX(track2->getBaseX());
+  base_2.setY(track2->getBaseY());
+  base_2.setZ(track2->getBaseZ());
   dir_2.setX(track2->getDirTx());
   dir_2.setY(track2->getDirTy());
   dir_2.setZ(1);//konwencja, tak jest ustawione w fwdetstrawvec
