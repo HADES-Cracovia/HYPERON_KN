@@ -1,8 +1,9 @@
 
 
 directory="../output_newGeometryM3/" #oryginal data directory
-fname="../files_list_M3.dat" #file with list of expected files
+#fname="../files_list_M3.dat" #file with list of expected files
 #fname="file5758_list.dat"
+fname="../files_list_k.dat"
 
 import subprocess
 print("Copy and hadd files from \"output_new_geometry_2\" directory")
