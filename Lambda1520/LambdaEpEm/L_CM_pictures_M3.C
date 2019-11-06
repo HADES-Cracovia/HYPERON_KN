@@ -53,9 +53,12 @@ void sethist(TH1F* hist, int color=1, int rebin=1, int style=1, double scale=1)
     hist->SetLineColor(color);
   else
     hist->SetLineColor(40);
+  
   hist->Rebin(rebin);
+  double binW=hist->GetBinWidth(10); //After re-binning
   hist->SetLineStyle(style);
-  hist->Scale(scale);
+  hist->Scale(scale/binW);
+  hist->GetYaxis()->SetTitle("#frac{d #sigma}{d M} [#frac{#mu b}{MeV}]");
   //hist->Smooth();
 }
 
@@ -120,22 +123,23 @@ int L_CM_pictures_M3()
   //TFile *MyFile = new TFile("output.root","recreate");
   //if ( MyFile->IsOpen() )
   //printf("File opened successfully\n");
-    
+
+  const float scale_factor=50000*1000;
   float scale[]={
-    1840./10,//channel 01 //10 times bgger statistics
-    130.*7.8e-5,//channel 48
-    130./5.34,//channel 49
-    300,//channel 04
-    300,//channel 02
-    43,//channel 40
-    10 /10,//channel 42 //10 times bgger statistics
-    7/10,//channel 44 //10 times bgger statistics
-    8.84e-4,//channel 50
-    7.59e-3,//channel 52
-    1.242e-1 / 8.065167e-10,//channel 55 weight 8.065167e-10 set in PLUTO
-    24e-2 / 8.065167e-10,//channel 56 weight 8.065167e-10 set in PLUTO
-    29e-4/ 8.065167e-10,//channel 57 weight 8.065167e-10 set in PLUTO
-    18.6e-4/ 8.065167e-10//channel 58 weight 8.065167e-10 set in PLUTO
+    1840./scale_factor/10,//channel 01 //10 times bgger statistics
+    11.3e-3/scale_factor,//channel 48
+    130./5.34/scale_factor,//channel 49
+    300/scale_factor,//channel 04
+    300/scale_factor,//channel 02
+    43/scale_factor,//channel 40
+    10.0/scale_factor /10,//channel 42 //10 times bgger statistics
+    7.0/scale_factor/10,//channel 44 //10 times bgger statistics
+    3e-4/scale_factor,//channel 50
+    8.1e-3/scale_factor,//channel 52
+    1.242e-1/scale_factor / 8.065167e-10,//channel 55 weight 8.065167e-10 set in PLUTO
+    24e-2/scale_factor / 8.065167e-10,//channel 56 weight 8.065167e-10 set in PLUTO
+    29e-4/scale_factor/ 8.065167e-10,//channel 57 weight 8.065167e-10 set in PLUTO
+    18.6e-4/scale_factor/ 8.065167e-10//channel 58 weight 8.065167e-10 set in PLUTO
   };//ub
   
   TH1F *hL1520massDistZLpi0[fn];
@@ -313,7 +317,8 @@ int L_CM_pictures_M3()
   TCanvas *cPictures = new TCanvas("cPictures","cPictures");
 
   cPictures->Divide(3,2);
-  double ymin=1e-4; //min value for y axis  
+  double ymin=1e-12; //min value for y axis
+  double ymax=1e-4;
     
   cPictures->cd(1);
   gPad->SetLogy();
@@ -331,8 +336,8 @@ int L_CM_pictures_M3()
 
   cPictures->cd(2);
   gPad->SetLogy();
-  hDLmassDistZL[0]->GetYaxis()->SetRangeUser(ymin,10e5);
-  hDLmassDistZLRL_L[0]->GetYaxis()->SetRangeUser(ymin,10e5);
+  hDLmassDistZL[0]->GetYaxis()->SetRangeUser(ymin,ymax);
+  hDLmassDistZLRL_L[0]->GetYaxis()->SetRangeUser(ymin,ymax);
   for(int x=0;x<n;x++)
     {
       hDLmassDistZL[x]->Draw("same");
@@ -353,7 +358,7 @@ int L_CM_pictures_M3()
 
   cPictures->cd(4);
   gPad->SetLogy();
-  hDLmassDistZL_emem[0]->GetYaxis()->SetRangeUser(ymin,10e4);
+  hDLmassDistZL_emem[0]->GetYaxis()->SetRangeUser(ymin,ymax);
   for(int x=0; x<n; x++)
     {
       //hL1520massDistZLpi0_epep[x]->Draw("same");
@@ -365,7 +370,7 @@ int L_CM_pictures_M3()
   
   cPictures->cd(5);
   gPad->SetLogy();
-  hDLmassDistZL_epep[0]->GetYaxis()->SetRangeUser(ymin,10e4);
+  hDLmassDistZL_epep[0]->GetYaxis()->SetRangeUser(ymin,ymax);
   for(int x=0; x<n; x++)
     {
       hDLmassDistZL_epep[x]->Draw("same");
