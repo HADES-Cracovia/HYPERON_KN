@@ -127,15 +127,15 @@ int L_CM_pictures_M3()
   const float scale_factor=50000*1000;
   float scale[]={
     1840./scale_factor/10,//channel 01 //10 times bgger statistics
-    11.3e-3/scale_factor,//channel 48
+    135*0.0085*1.35/137/scale_factor,//channel 48
     130./5.34/scale_factor,//channel 49
     300/scale_factor,//channel 04
     300/scale_factor,//channel 02
     43/scale_factor,//channel 40
     10.0/scale_factor /10,//channel 42 //10 times bgger statistics
     7.0/scale_factor/10,//channel 44 //10 times bgger statistics
-    3e-4/scale_factor,//channel 50
-    8.1e-3/scale_factor,//channel 52
+    56.9*0.00054*1.35/137/scale_factor,//channel 50
+    93.12*0.012*1.35*1/137/scale_factor,//channel 52
     1.242e-1/scale_factor / 8.065167e-10,//channel 55 weight 8.065167e-10 set in PLUTO
     24e-2/scale_factor / 8.065167e-10,//channel 56 weight 8.065167e-10 set in PLUTO
     29e-4/scale_factor/ 8.065167e-10,//channel 57 weight 8.065167e-10 set in PLUTO
