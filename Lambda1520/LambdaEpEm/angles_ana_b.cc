@@ -347,13 +347,13 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
      
   TH1F *hDLmassDistZL=new TH1F("hDLmassDistZL","hDLmassDistZL",1000,0,700);
   TH1F *hL1520massDistZL=new TH1F("hL1520massDistZL","hL1520massDistZL",1000,1200,2200);
-
+  TH1F *hDLmassDistZL_Lambda=new TH1F("hDLmassDistZL_Lambda","hDLmassDistZL_Lambda",1000,0,700);
+  TH1F *hDLmassDistZL_Sigma=new TH1F("hDLmassDistZL_Sigma","hDLmassDistZL_Sigma",1000,0,700);
+    
   TH1F *hDLmassDistZLRL=new TH1F("hDLmassDistZLRL","hDLmassDistZLRL",1000,0,700);
   TH1F *hL1520massDistZLRL=new TH1F("hL1520massDistZLRL","hL1520massDistZLRL",1000,1200,2200);
   TH1F *hDLmassDistZLRL_L=new TH1F("hDLmassDistZLRL_L","hDLmassDistZLRL_L",1000,0,700);
   TH1F *hL1520massDistZLRL_L=new TH1F("hL1520massDistZLRL_L","hL1520massDistZLRL_L",1000,1200,2200);
-
-
      
   TH1F *hDLmassFinal=new TH1F("hDLmassFinal","hDLmassFinal",1000,0,700);
   TH1F *hL1520massFinal=new TH1F("hL1520massFinal","hL1520massFinal",1000,1200,2200);
@@ -402,8 +402,10 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   TH1F *hL1520massFTDistLRL=new TH1F("hL1520massFTDistLRL","hL1520massFTDistLRL",1000,1200,2200);
      
   TH1F *hDLmassFTDistZL=new TH1F("hDLmassFTDistZL","hDLmassFTDistZL",1000,0,700);
-  TH1F *hL1520massFTDistZL=new TH1F("hL1520massFTDistZL","hL1520massFTDistZL",1000,1200,2200);
-
+  TH1F *hDLmassFTDistZL_Lambda=new TH1F("hDLmassFTDistZL_Lambda","hDLmassFTDistZL_Lambda",1000,0,700);
+  TH1F *hDLmassFTDistZL_Sigma=new TH1F("hDLmassFTDistZL_Sigma","hDLmassFTDistZL_Sigma",1000,0,700);
+   TH1F *hL1520massFTDistZL=new TH1F("hL1520massFTDistZL","hL1520massFTDistZL",1000,1200,2200);
+  
   TH1F *hDLmassFTDistZLRL=new TH1F("hDLmassFTDistZLRL","hDLmassFTDistZLRL",1000,0,700);
   TH1F *hL1520massFTDistZLRL=new TH1F("hL1520massFTDistZLRL","hL1520massFTDistZLRL",1000,1200,2200);
   TH1F *hL1520massFTDistZLRLpi0=new TH1F("hL1520massFTDistZLRLpi0","hL1520massFTDistZLRLpi0",1000,1200,2200);
@@ -471,6 +473,8 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   TH1F *hL1520massDistLRL_L_epep=new TH1F("hL1520massDistLRL_L_epep","hL1520massDistLRL_L_epep",1000,1200,2200);
      
   TH1F *hDLmassDistZL_epep=new TH1F("hDLmassDistZL_epep","hDLmassDistZL_epep",1000,0,700);
+  TH1F *hDLmassDistZL_Lambda_epep=new TH1F("hDLmassDistZL_Lambda_epep","hDLmassDistZL_Lambda_epep",1000,0,700);
+  TH1F *hDLmassDistZL_Sigma_epep=new TH1F("hDLmassDistZL_Sigma_epep","hDLmassDistZL_Sigma_epep",1000,0,700);
   TH1F *hL1520massDistZL_epep=new TH1F("hL1520massDistZL_epep","hL1520massDistZL_epep",1000,1200,2200);
 
   TH1F *hDLmassDistZLRL_epep=new TH1F("hDLmassDistZLRL_epep","hDLmassDistZLRL_epep",1000,0,700);
@@ -544,6 +548,8 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   TH1F *hL1520massDistLRL_L_emem=new TH1F("hL1520massDistLRL_L_emem","hL1520massDistLRL_L_emem",1000,1200,2200);
      
   TH1F *hDLmassDistZL_emem=new TH1F("hDLmassDistZL_emem","hDLmassDistZL_emem",1000,0,700);
+  TH1F *hDLmassDistZL_Lambda_emem=new TH1F("hDLmassDistZL_Lambda_emem","hDLmassDistZL_Lambda_emem",1000,0,700);
+  TH1F *hDLmassDistZL_Sigma_emem=new TH1F("hDLmassDistZL_Sigma_emem","hDLmassDistZL_Sigma_emem",1000,0,700);
   TH1F *hL1520massDistZL_emem=new TH1F("hL1520massDistZL_emem","hL1520massDistZL_emem",1000,1200,2200);
 
   TH1F *hDLmassDistZLRL_emem=new TH1F("hDLmassDistZLRL_emem","hDLmassDistZLRL_emem",1000,0,700);
@@ -562,11 +568,8 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   TH1F *hDLmassFinalRL_L_emem=new TH1F("hDLmassFinalRL_L_emem","hDLmassFinalRL_L_emem",1000,0,700);
   TH1F *hL1520massFinalRL_L_emem=new TH1F("hL1520massFinalRL_L_emem","hL1520massFinalRL_L_emem",1000,1200,2200);
      
-     
   TH1F *hL1520massFinalRLpi0_emem=new TH1F("hL1520massFinalRLpi0_emem","hL1520massFinalRLpi0_emem",1000,1200,2200);
-
   TH1F *hL1520massFinalRLpi0_L_emem=new TH1F("hL1520massFinalRLpi0_L_emem","hL1520massFinalRLpi0_L_emem",1000,1200,2200);
-
 
   TH1F *hL1520massFinalpi0_emem=new TH1F("hL1520massFinalpi0_emem","hL1520massFinalpi0_emem",1000,1200,2200);
   TH1F *hL1520massDistZLpi0_emem=new TH1F("hL1520massDistZLpi0_emem","hL1520massDistZLpi0_emem",1000,1200,2200);

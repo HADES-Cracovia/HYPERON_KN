@@ -2,6 +2,8 @@
 #include <string>
 #include <fstream>
 #include <algorithm>
+#include <format_histograms.C>
+
 bool is_in(int n, int signals[])
 {
   size_t myArraySize = sizeof(signals) / sizeof(int);
@@ -429,6 +431,10 @@ int L_CM_pictures_M3()
   hL1520_delta->Draw("same");
   hL1520_delta->SetLineWidth(2);
 
+  format_l1520(hL1520massDistZLpi0[1]);
+  format_s1385(hL1520massDistZLpi0[8]);
+  format_l1405(hL1520massDistZLpi0[9]);
+  format_cb(sum_renormalize);
 
   //dI-LEPTON SPECTRUM
   
@@ -464,21 +470,18 @@ int L_CM_pictures_M3()
   hDLmass_FF->SetLineColor(kGreen);
   hDLmass_delta->Draw("same");
   hDLmass_delta->SetLineWidth(2);
-
+  
   //draw signal channels
   int jmax=sizeof(signal_ch)/sizeof(signal_ch[0]);
   for(int j=0;j<jmax;j++)
     {
       hDLmassDistZL[signal_ch[j]]->Draw("same");
     }
-  //hDLmassDistZL[0]->Draw("same");
-  //hDLmassDistZL[10]->Draw("same");
-  //hDLmassDistZL[11]->Draw("same");
-  //hDLmassDistZL[1]->Draw("same");
-  //hDLmassDistZL[8]->Draw("same");
-  //hDLmassDistZL[9]->Draw("same");
-  
-  
+  format_l1520(hDLmassDistZL[signal_ch[0]]);
+  format_s1385(hDLmassDistZL[signal_ch[1]]);
+  format_l1405(hDLmassDistZL[signal_ch[2]]);
+  format_cb(hDLmass_background_renolmalize);
+    
   //MyFile->Close();
   //if (!( MyFile->IsOpen()) )
   //printf("File closed successfully\n");
