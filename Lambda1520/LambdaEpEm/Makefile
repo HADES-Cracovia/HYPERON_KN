@@ -11,7 +11,7 @@ HOME:=/u/knowakow
 
 include $(HADDIR)/hades.def.mk
 
-LIB_DIRS += $(PLUTODIR) #${HOME}/usr/lib64
+#LIB_DIRS += $(PLUTODIR) #${HOME}/usr/lib64
 #INC_DIRS += ${HOME}/usr/include
 #HYDRA_LIBS    += -lParticleEvent
 

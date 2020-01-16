@@ -52,8 +52,8 @@ void format_epem(TH1 * h) {
 void format_cb(TH1 * h) {
   h->SetLineColor(0);
   h->SetLineStyle(3);
-  h->SetMarkerColor(2);
-  h->SetMarkerStyle(20);
+  h->SetMarkerColor(kRed);
+  h->SetMarkerStyle(8);
   h->SetMarkerSize(2.4);
   h->GetXaxis()->SetRange(1,13);
   h->GetXaxis()->SetLabelFont(42);
