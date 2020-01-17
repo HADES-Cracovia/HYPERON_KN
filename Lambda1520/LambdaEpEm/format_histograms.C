@@ -49,85 +49,86 @@ void format_epem(TH1 * h) {
   h->GetZaxis()->SetTitleFont(42);
 }
 
-void format_cb(TH1 * h) {
-  h->SetLineColor(0);
-  h->SetLineStyle(3);
+void format_cb(TH1 * h)
+{
+  h->SetLineWidth(1);
+  h->SetLineColor(kRed);
   h->SetMarkerColor(kRed);
   h->SetMarkerStyle(8);
   h->SetMarkerSize(2.4);
-  h->GetXaxis()->SetRange(1,13);
-  h->GetXaxis()->SetLabelFont(42);
-  h->GetXaxis()->SetLabelSize(0.035);
-  h->GetXaxis()->SetTitleSize(0.035);
-  h->GetXaxis()->SetTitleFont(42);
-  h->GetYaxis()->SetLabelFont(42);
-  h->GetYaxis()->SetLabelSize(0.035);
-  h->GetYaxis()->SetTitleSize(0.035);
-  h->GetYaxis()->SetTitleFont(42);
-  h->GetZaxis()->SetLabelFont(42);
-  h->GetZaxis()->SetLabelSize(0.035);
-  h->GetZaxis()->SetTitleSize(0.035);
-  h->GetZaxis()->SetTitleFont(42);
+//h->GetXaxis()->SetRange(1,13);
+  //h->GetXaxis()->SetLabelFont(42);
+  //h->GetXaxis()->SetLabelSize(0.035);
+  //h->GetXaxis()->SetTitleSize(0.035);
+  //h->GetXaxis()->SetTitleFont(42);
+  //h->GetYaxis()->SetLabelFont(42);
+  //h->GetYaxis()->SetLabelSize(0.035);
+  //h->GetYaxis()->SetTitleSize(0.035);
+  //h->GetYaxis()->SetTitleFont(42);
+  //h->GetZaxis()->SetLabelFont(42);
+  //h->GetZaxis()->SetLabelSize(0.035);
+  //h->GetZaxis()->SetTitleSize(0.035);
+  //h->GetZaxis()->SetTitleFont(42);
 }
 
 void format_l1520(TH1 * h) {
   //h->SetTitle("#Lambda(1520) #rightarrow #Lambda e^{+}e^{-}");
-  //    h->SetLineStyle(9);
+  h->SetLineStyle(9);
   h->SetLineColor(46);
-  h->SetLineWidth(2);
+  h->SetLineWidth(3);
   //h->GetXaxis()->SetRange(3,49);
-  h->GetXaxis()->SetLabelFont(42);
-  h->GetXaxis()->SetLabelSize(0.035);
-  h->GetXaxis()->SetTitleSize(0.035);
-  h->GetXaxis()->SetTitleFont(42);
-  h->GetYaxis()->SetLabelFont(42);
-  h->GetYaxis()->SetLabelSize(0.035);
-  h->GetYaxis()->SetTitleSize(0.035);
-  h->GetYaxis()->SetTitleFont(42);
-  h->GetZaxis()->SetLabelFont(42);
-  h->GetZaxis()->SetLabelSize(0.035);
-  h->GetZaxis()->SetTitleSize(0.035);
-  h->GetZaxis()->SetTitleFont(42);
+  //h->GetXaxis()->SetLabelFont(42);
+  //h->GetXaxis()->SetLabelSize(0.035);
+  //h->GetXaxis()->SetTitleSize(0.035);
+  //h->GetXaxis()->SetTitleFont(42);
+  //h->GetYaxis()->SetLabelFont(42);
+  //h->GetYaxis()->SetLabelSize(0.035);
+  //h->GetYaxis()->SetTitleSize(0.035);
+  //h->GetYaxis()->SetTitleFont(42);
+  //h->GetZaxis()->SetLabelFont(42);
+  //h->GetZaxis()->SetLabelSize(0.035);
+  //h->GetZaxis()->SetTitleSize(0.035);
+  //h->GetZaxis()->SetTitleFont(42);
 }
 
 void format_l1405(TH1 * h) {
   //h->SetTitle("#Lambda(1405) #rightarrow #Lambda e^{+}e^{-}");
   h->SetLineColor(30);
-  //    h->SetLineStyle(2);
-  h->SetLineWidth(2);
+  h->SetLineStyle(2);
+  h->SetLineWidth(3);
   //h->GetXaxis()->SetRange(3,49);
-  h->GetXaxis()->SetLabelFont(42);
-  h->GetXaxis()->SetLabelSize(0.035);
-  h->GetXaxis()->SetTitleSize(0.035);
-  h->GetXaxis()->SetTitleFont(42);
-  h->GetYaxis()->SetLabelFont(42);
-  h->GetYaxis()->SetLabelSize(0.035);
-  h->GetYaxis()->SetTitleSize(0.035);
-  h->GetYaxis()->SetTitleFont(42);
-  h->GetZaxis()->SetLabelFont(42);
-  h->GetZaxis()->SetLabelSize(0.035);
-  h->GetZaxis()->SetTitleSize(0.035);
-  h->GetZaxis()->SetTitleFont(42);
+  //h->GetXaxis()->SetLabelFont(42);
+  //h->GetXaxis()->SetLabelSize(0.035);
+  //h->GetXaxis()->SetTitleSize(0.035);
+  //h->GetXaxis()->SetTitleFont(42);
+  //h->GetYaxis()->SetLabelFont(42);
+  //h->GetYaxis()->SetLabelSize(0.035);
+  //h->GetYaxis()->SetTitleSize(0.035);
+  //h->GetYaxis()->SetTitleFont(42);
+  //h->GetZaxis()->SetLabelFont(42);
+  //h->GetZaxis()->SetLabelSize(0.035);
+  //h->GetZaxis()->SetTitleSize(0.035);
+  //h->GetZaxis()->SetTitleFont(42);
 }
 
 void format_s1385(TH1 * h) {
   //h->SetTitle("#Sigma(1385) #rightarrow #Lambda e^{+}e^{-}");
   h->SetLineColor(38);
-  //    h->SetLineStyle(10);
-  h->SetLineWidth(2);
+  h->SetLineStyle(10);
+  h->SetLineWidth(3);
   //h->GetXaxis()->SetRange(3,49);
-  h->GetXaxis()->SetLabelFont(42);
-  h->GetXaxis()->SetLabelSize(0.035);
-  h->GetXaxis()->SetTitleSize(0.035);
-  h->GetXaxis()->SetTitleFont(42);
-  h->GetYaxis()->SetLabelFont(42);
-  h->GetYaxis()->SetLabelSize(0.035);
-  h->GetYaxis()->SetTitleSize(0.035);
-  h->GetYaxis()->SetTitleFont(42);
-  h->GetZaxis()->SetLabelFont(42);
-  h->GetZaxis()->SetLabelSize(0.035);
-  h->GetZaxis()->SetTitleSize(0.035);
-  h->GetZaxis()->SetTitleFont(42);
+  //h->GetXaxis()->SetLabelFont(42);
+  //h->GetXaxis()->SetLabelSize(0.035);
+  //h->GetXaxis()->SetTitleSize(0.035);
+  //h->GetXaxis()->SetTitleFont(42);
+  //h->GetYaxis()->SetLabelFont(42);
+  //h->GetYaxis()->SetLabelSize(0.035);
+  //h->GetYaxis()->SetTitleSize(0.035);
+  //h->GetYaxis()->SetTitleFont(42);
+  //h->GetZaxis()->SetLabelFont(42);
+  //h->GetZaxis()->SetLabelSize(0.035);
+  //h->GetZaxis()->SetTitleSize(0.035);
+  //h->GetZaxis()->SetTitleFont(42);
 }
 
 /* For legend use code below */

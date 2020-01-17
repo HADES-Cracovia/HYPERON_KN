@@ -111,7 +111,7 @@ int sumSignals(TH1F* &histSum, TH1F** hists, int channels, int signal[])
   return 1;
 }
 
-int L_CM_pictures_M3()
+int L_CM_pictures_M3_ver2()
 {
   const int fn=14;//number of files in "infile"
   const int signal_ch[]={1,8,9};//list of signal channels in "infile" file, starting from 0
@@ -119,7 +119,7 @@ int L_CM_pictures_M3()
   std::ifstream infile("files_list_k.dat");//list of histograms
   std::string file;
   //std::string directory="/lustre/nyx/hades/user/iciepal/Lambda1520_ic/";//directory comon for all files
-  std::string directory="./results_newGeometryM3/";//directory comon for all files
+  std::string directory="./results_newGeometryM3_ver2/";//directory comon for all files
   int n=0;
   //write everything to file
   //TFile *MyFile = new TFile("output.root","recreate");
@@ -404,8 +404,6 @@ int L_CM_pictures_M3()
   hL1520mass_FF->Scale(ff_const);
   //**********************************
 
-  gStyle->SetOptStat(0);
-  
   //L1520 SPECTRUM
   
   TCanvas* cFinalL1520=new TCanvas("cFinalL1520","cFinalL1520");
@@ -423,21 +421,7 @@ int L_CM_pictures_M3()
   hL1520mass_sum_all_signals->Draw("same");
   hL1520mass_sum_all_signals->SetLineWidth(2);
   hL1520mass_sum_all_signals->SetLineColor(kGreen);
-  hL1520mass_sum_all_signals->SetTitle("Y #rightarrow #Lambda e^{+}e^{-}");
-  hL1520mass_sum_all_signals->GetXaxis()->SetRangeUser(1200,1800);
-  hL1520mass_sum_all_signals->GetXaxis()->SetLabelFont(42);
-  hL1520mass_sum_all_signals->GetXaxis()->SetNdivisions(505);
-  hL1520mass_sum_all_signals->GetXaxis()->SetLabelSize(0.05);
-  hL1520mass_sum_all_signals->GetXaxis()->SetTitleSize(0.05);
-  hL1520mass_sum_all_signals->GetXaxis()->SetTitleOffset(1.1);
-  hL1520mass_sum_all_signals->GetXaxis()->SetTitleFont(42);
-  hL1520mass_sum_all_signals->GetYaxis()->SetLabelFont(42);
-  hL1520mass_sum_all_signals->GetYaxis()->SetLabelSize(0.05);
-  hL1520mass_sum_all_signals->GetYaxis()->SetTitleOffset(1.15);
-  hL1520mass_sum_all_signals->GetYaxis()->SetTitleSize(0.05);
-  hL1520mass_sum_all_signals->GetYaxis()->SetTitleFont(42);
-  
-  sum_renormalize->Draw("psame");
+  sum_renormalize->Draw("same");
   sum_renormalize->Smooth();
   //CM_background->Draw("same");
   //CM_background->SetLineColor(kBlue);
@@ -447,30 +431,10 @@ int L_CM_pictures_M3()
   hL1520_delta->Draw("same");
   hL1520_delta->SetLineWidth(2);
 
-  format_l1520(hL1520massDistZLpi0[1]);
-  format_s1385(hL1520massDistZLpi0[8]);
-  format_l1405(hL1520massDistZLpi0[9]);
-  format_cb(sum_renormalize);
-
-  TLegend *leg = new TLegend(0.7,0.6,0.9,0.95,NULL,"brNDC");
-  leg->SetBorderSize(0);
-  leg->SetTextSize(0.027);
-  TLegendEntry *entry=leg->AddEntry(hL1520mass_sum_all_signals,"Y #rightarrow #Lambda e^{+}e^{-}","lpf");
-  entry->SetFillStyle(1001);
-  entry->SetTextFont(42);
-  entry=leg->AddEntry(sum_renormalize,"CB","lpf");
-  entry->SetTextFont(42);
-  entry=leg->AddEntry(hL1520massDistZLpi0[1],"#Lambda(1520) #rightarrow #Lambda e^{+}e^{-}","lpf");
-  entry->SetTextFont(42);
-  entry=leg->AddEntry(hL1520massDistZLpi0[9],"#Lambda(1405) #rightarrow #Lambda e^{+}e^{-}","lpf");
-  entry->SetFillStyle(1001);
-  entry->SetTextFont(42);
-  entry=leg->AddEntry(hL1520massDistZLpi0[8],"#Sigma(1385) #rightarrow #Lambda e^{+}e^{-}","lpf");
-  entry->SetTextFont(42);
-  leg->Draw();
-  
-  
-  cFinalL1520->Update();
+  //format_l1520(hL1520massDistZLpi0[1]);
+  //format_s1385(hL1520massDistZLpi0[8]);
+  //format_l1405(hL1520massDistZLpi0[9]);
+  //format_cb(sum_renormalize);
 
   //dI-LEPTON SPECTRUM
   
@@ -485,64 +449,42 @@ int L_CM_pictures_M3()
 
   hDLmass_sum_right_vertex->Add(hDLmass_delta,-1);
   hDLmass_sum_right_vertex->Add(hDLmass_sum_all_signals,-1);
-  hDLmass_sum_right_vertex->GetXaxis()->SetTitle("M^{inv}_{e^{+} e^{-}} #left[MeV c^{-2} #right]");
-
-  //set graphical properties for first histogram on canvas
-  hDLmass_sum_right_vertex->SetTitle("Y #rightarrow #Lambda e^{+}e^{-}");
-  hDLmass_sum_right_vertex->GetXaxis()->SetRangeUser(0,500);
-  hDLmass_sum_right_vertex->GetXaxis()->SetLabelFont(42);
-  hDLmass_sum_right_vertex->GetXaxis()->SetNdivisions(505);
-  hDLmass_sum_right_vertex->GetXaxis()->SetLabelSize(0.05);
-  hDLmass_sum_right_vertex->GetXaxis()->SetTitleSize(0.05);
-  hDLmass_sum_right_vertex->GetXaxis()->SetTitleOffset(1.1);
-  hDLmass_sum_right_vertex->GetXaxis()->SetTitleFont(42);
-  hDLmass_sum_right_vertex->GetYaxis()->SetTitle("#frac{d#sigma}{dM_{e^{+}e^{-}}} #left[#frac{#mub}{MeV c^{-2}} #right]");
-  hDLmass_sum_right_vertex->GetYaxis()->SetLabelFont(42);
-  hDLmass_sum_right_vertex->GetYaxis()->SetLabelSize(0.05);
-  hDLmass_sum_right_vertex->GetYaxis()->SetTitleOffset(1.35);
-  hDLmass_sum_right_vertex->GetYaxis()->SetTitleSize(0.05);
-  hDLmass_sum_right_vertex->GetYaxis()->SetTitleFont(42);
-
+  hDLmass_sum_right_vertex->GetXaxis()->SetTitle("M_{e^{+} e^{-}} [MeV]");
   
   hDLmass_sum_right_vertex->Draw("same");
   hDLmass_sum_right_vertex->SetLineColor(kMagenta);
   hDLmass_sum_right_vertex->SetLineStyle(1);
   hDLmass_sum_right_vertex->SetLineWidth(3);
 
-  hDLmass_background_renolmalize->Draw("psame");
-  //hDLmass_background_renolmalize->SetLineWidth(1);
-  //hDLmass_background_renolmalize->SetLineColor(kRed);
-  //hDLmass_background_renolmalize->SetMarkerColor(kRed);
-  //hDLmass_background_renolmalize->SetMarkerStyle(8);
-  //hDLmass_background_renolmalize->SetMarkerSize(2.4);
-
-
+  hDLmass_background_renolmalize->Draw("same");
+  hDLmass_background_renolmalize->SetLineWidth(1);
+  hDLmass_background_renolmalize->SetLineColor(kRed);
   hDLmass_sum_all_signals->Draw("same");
   hDLmass_sum_all_signals->SetLineColor(kGreen);
-  hDLmass_sum_all_signals->SetLineWidth(4);
+  hDLmass_sum_all_signals->SetLineWidth(3);
   hDLmass_sum_all_signals->SetFillStyle(3144);
   //hDLmass_sum_background_re->Draw("same");
   //hDLmass_sum_background_re->SetLineColor(kBlue);
-  hDLmass_FF->SetLineWidth(0);
   hDLmass_FF->Draw("same");
-  hDLmass_FF->SetLineStyle(3);
+  hDLmass_FF->SetLineStyle(2);
   hDLmass_FF->SetLineColor(kGreen);
   hDLmass_delta->Draw("same");
-  hDLmass_delta->SetLineWidth(3);
+  hDLmass_delta->SetLineWidth(2);
   
   //draw signal channels
   int jmax=sizeof(signal_ch)/sizeof(signal_ch[0]);
   for(int j=0;j<jmax;j++)
     {
       hDLmassDistZL[signal_ch[j]]->Draw("same");
-      hDLmassDistZL[signal_ch[j]]->SetLineWidth(3);
     }
-  format_l1520(hDLmassDistZL[signal_ch[0]]);
-  format_s1385(hDLmassDistZL[signal_ch[1]]);
-  format_l1405(hDLmassDistZL[signal_ch[2]]);
-  format_cb(hDLmass_background_renolmalize);
 
-  cFinalDL_cb->Update();
+  //Nie dziala!!!
+  //format_l1520(hDLmassDistZL[signal_ch[0]]);
+  //format_s1385(hDLmassDistZL[signal_ch[1]]);
+  //format_l1405(hDLmassDistZL[signal_ch[2]]);
+  //format_cb(hDLmass_background_renolmalize);
+  ///format_cb(hL1520mass_background);
+  
   //MyFile->Close();
   //if (!( MyFile->IsOpen()) )
   //printf("File closed successfully\n");
