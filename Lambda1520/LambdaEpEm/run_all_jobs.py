@@ -25,7 +25,7 @@ for k in content:   #take every name from vector content
         print('waiting to finish list: {}'.format(k))
         print('still {} jobs to the end'.format(subprocess.check_output('squeue -u knowakow | wc -l',shell=True,)))
         time.sleep(30)
-    bashCommand = "./run_job.py "+k+" -d output_newGeometryM3_ver2"
+    bashCommand = "./run_job.py "+k+" -d output_newGeometryM3_ver3"
     print(bashCommand)
     os.system(bashCommand)
 

@@ -55,7 +55,7 @@ void format_cb(TH1 * h)
   h->SetLineColor(kRed);
   h->SetMarkerColor(kRed);
   h->SetMarkerStyle(8);
-  h->SetMarkerSize(2.4);
+  h->SetMarkerSize(1.6);
 //h->GetXaxis()->SetRange(1,13);
   //h->GetXaxis()->SetLabelFont(42);
   //h->GetXaxis()->SetLabelSize(0.035);
@@ -75,7 +75,7 @@ void format_l1520(TH1 * h) {
   //h->SetTitle("#Lambda(1520) #rightarrow #Lambda e^{+}e^{-}");
   h->SetLineStyle(9);
   h->SetLineColor(46);
-  h->SetLineWidth(3);
+  h->SetLineWidth(4);
   //h->GetXaxis()->SetRange(3,49);
   //h->GetXaxis()->SetLabelFont(42);
   //h->GetXaxis()->SetLabelSize(0.035);
@@ -95,7 +95,7 @@ void format_l1405(TH1 * h) {
   //h->SetTitle("#Lambda(1405) #rightarrow #Lambda e^{+}e^{-}");
   h->SetLineColor(30);
   h->SetLineStyle(2);
-  h->SetLineWidth(3);
+  h->SetLineWidth(4);
   //h->GetXaxis()->SetRange(3,49);
   //h->GetXaxis()->SetLabelFont(42);
   //h->GetXaxis()->SetLabelSize(0.035);
@@ -115,7 +115,7 @@ void format_s1385(TH1 * h) {
   //h->SetTitle("#Sigma(1385) #rightarrow #Lambda e^{+}e^{-}");
   h->SetLineColor(38);
   h->SetLineStyle(10);
-  h->SetLineWidth(3);
+  h->SetLineWidth(4);
   //h->GetXaxis()->SetRange(3,49);
   //h->GetXaxis()->SetLabelFont(42);
   //h->GetXaxis()->SetLabelSize(0.035);
