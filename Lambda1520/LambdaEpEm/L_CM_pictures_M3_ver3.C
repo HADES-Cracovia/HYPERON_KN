@@ -4,6 +4,26 @@
 #include <algorithm>
 #include <format_histograms.C>
 
+void normalize(TH1* hist)
+{
+  for (Int_t j=1; j<hist->GetNbinsX()+1; ++j)
+    {
+      hist->SetBinContent( j, hist->GetBinContent(j) / hist->GetBinWidth(j) );
+      //         hist->SetBinError( j, TMath::Sqrt( hist->GetBinContent(j) ) );
+      hist->SetBinError( j, hist->GetBinError(j) / hist->GetBinWidth(j) );
+    }
+}
+
+TH1F* scale(TH1F* h1, double s)
+{
+  for (Int_t j=1; j<hist->GetNbinsX()+1; ++j)
+    {
+      hist->SetBinContent( j, hist->GetBinContent(j) /s );
+      //         hist->SetBinError( j, TMath::Sqrt( hist->GetBinContent(j) ) );
+      hist->SetBinError( j, hist->GetBinError(j) /s );
+    }
+}
+
 bool is_in(int n, int signals[])
 {
   size_t myArraySize = sizeof(signals) / sizeof(int);
@@ -24,7 +44,7 @@ TH1F* renolmalize(TH1F* hist, double scale)
   TH1F* temp =(TH1F*)hist->Clone("hist_renolmalize");
   temp->Rebin(scale);
   temp->Scale(1/scale);
-  return temp;
+   return temp;
 }
 
 int sum_background(TH1F* &hist, TH1F* back1, TH1F* back2)
@@ -57,9 +77,10 @@ void sethist(TH1F* hist, int color=1, int rebin=1, int style=1, double scale=1)
     hist->SetLineColor(40);
   
   hist->Rebin(rebin);
-  double binW=hist->GetBinWidth(10); //After re-binning
+  //double binW=hist->GetBinWidth(10); //After re-binning
   hist->SetLineStyle(style);
-  hist->Scale(scale/binW);
+  normalize(hist);
+  hist->Scale(scale);  
   hist->GetYaxis()->SetTitle("#frac{d #sigma}{d M} [#frac{#mu b}{MeV}]");
   //hist->Smooth();
 }
@@ -227,7 +248,30 @@ int L_CM_pictures_M3_ver3()
 
       hDLmassDistZL_epep[n]= (TH1F*)hist_file->Get("hDLmassDistZL_epep")->Clone();
       hDLmassDistZL_emem[n]= (TH1F*)hist_file->Get("hDLmassDistZL_emem")->Clone();
+
+      //call Sumw2 for all histograms
       
+       hL1520massDistZLpi0[n]->Sumw2();
+      //hL1520massFTDistZLpi0[n]->Sumw2();
+      hL1520massFinalRLpi0[n]->Sumw2();
+      hL1520massFTFinalRLpi0[n]->Sumw2();
+      hL1520massFinalpi0[n]->Sumw2();
+      hL1520massFTFinalpi0[n]->Sumw2();
+      
+      hL1520massFinalRLpi0_L[n]->Sumw2();
+      hL1520massDistZLRLpi0_L[n]->Sumw2();
+
+      hDLmassFinalRL_L[n]->Sumw2();
+      hDLmassDistZL_L[n]->Sumw2();
+      hDLmassDistZL[n]->Sumw2();
+      hDLmassFTDistZL[n]->Sumw2();
+
+      hL1520massDistZLpi0_epep[n]->Sumw2();
+      hL1520massDistZLpi0_emem[n]->Sumw2();
+
+      hDLmassDistZL_epep[n]->Sumw2();
+      hDLmassDistZL_emem[n]->Sumw2();
+
       n++;
     }
   //end of reading histograms*************************************************************************
