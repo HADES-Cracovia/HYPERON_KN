@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <format_histograms.C>
 
-void normalize(TH1* hist)
+void normalize(TH1* hist) //divide by bin width with proper error propagation
 {
   for (Int_t j=1; j<hist->GetNbinsX()+1; ++j)
     {
@@ -14,37 +14,41 @@ void normalize(TH1* hist)
     }
 }
 
-TH1F* scale(TH1F* h1, double s)
+void scale(TH1F* hist, double s)
 {
+  //hist->Scale(s);
+  
   for (Int_t j=1; j<hist->GetNbinsX()+1; ++j)
     {
-      hist->SetBinContent( j, hist->GetBinContent(j) /s );
-      //         hist->SetBinError( j, TMath::Sqrt( hist->GetBinContent(j) ) );
-      hist->SetBinError( j, hist->GetBinError(j) /s );
+      //if(hist->GetBinContent(j)<1 && hist->GetBinContent(j)!=0)
+	//cout<<"bin contnet: "<<hist->GetBinContent(j)<<" bin error: "<<hist->GetBinError(j)<<" scale "<<s<<endl;
+      hist->SetBinContent( j, hist->GetBinContent(j)*s );
+      //hist->SetBinError( j, TMath::Sqrt( hist->GetBinContent(j) ) );
+      hist->SetBinError( j, hist->GetBinError(j)*s );
+      //if(hist->GetBinContent(j)<1 && hist->GetBinContent(j)!=0)
+      //cout<<"bin contnet: "<<hist->GetBinContent(j)<<" bin error: "<<hist->GetBinError(j)<<endl<<endl;
     }
+  //cout<<"end of histogram"<<endl<<"********************"<<endl;
+  
 }
 
-bool is_in(int n, int signals[])
+bool is_in(int n, int signals[],int size)
 {
-  size_t myArraySize = sizeof(signals) / sizeof(int);
-  int *end = signals + myArraySize;
-  // find the value 0:
-  int *result = std::find(signals, end, n);
-  if(signals[myArraySize]==n)
-    return 1;
-
-  if (result != end)
-    return 1;
-  else
-    return 0;
+  //cout<<"n "<<n<<" signals "<<signals<<endl;
+  for(int i=0; i<size;i++)
+    {
+      if(n==signals[i])
+	return true;
+    }
+  return false;
 }
 
-TH1F* renolmalize(TH1F* hist, double scale)
+TH1F* renolmalize(TH1F* hist, double sc)
 {
   TH1F* temp =(TH1F*)hist->Clone("hist_renolmalize");
-  temp->Rebin(scale);
-  temp->Scale(1/scale);
-   return temp;
+  temp->Rebin(sc);
+  scale(temp,1/sc);
+  return temp;
 }
 
 int sum_background(TH1F* &hist, TH1F* back1, TH1F* back2)
@@ -64,30 +68,30 @@ int sum_background(TH1F* &hist, TH1F* back1, TH1F* back2)
     {
       //cout<<j;
       hist->SetBinContent(j, 2*TMath::Sqrt(back1->GetBinContent(j)*back2->GetBinContent(j)));
-      //hist->SetBinError(j, TMath::Sqrt( back1->GetBinError(j)*back1->GetBinError(j)+back2->GetBinError(j)*back2->GetBinError(j) ));
+      hist->SetBinError(j, TMath::Sqrt( back1->GetBinError(j)*back1->GetBinError(j)+back2->GetBinError(j)*back2->GetBinError(j) ));
     }
   return 1;
 }
 
-void sethist(TH1F* hist, int color=1, int rebin=1, int style=1, double scale=1)
+void sethist(TH1F* hist, int color=1, int rebin=1, int style=1, double sc=1)
 {
   if(color!=0 && color!=10)//avoid white color
     hist->SetLineColor(color);
   else
     hist->SetLineColor(40);
   
-  hist->Rebin(rebin);
   //double binW=hist->GetBinWidth(10); //After re-binning
   hist->SetLineStyle(style);
-  normalize(hist);
-  hist->Scale(scale);  
+  hist->Rebin(rebin);
+  scale(hist,sc);
+  normalize(hist);//divide by the bin width
   hist->GetYaxis()->SetTitle("#frac{d #sigma}{d M} [#frac{#mu b}{MeV}]");
   //hist->Smooth();
 }
 
 int calcBg(TH1F* &histBG, TH1F** hists, int channels, int signal[])
 {
-  if(!is_in(0,signal))
+  if(!is_in(0,signal,3))
     histBG=(TH1F*)hists[0]->Clone("background");
   else
     histBG=(TH1F*)hists[1]->Clone("background");
@@ -96,9 +100,9 @@ int calcBg(TH1F* &histBG, TH1F** hists, int channels, int signal[])
   
   for(int i=0;i<channels;i++)
     {
-      if(is_in(i,signal))
+      if(is_in(i,signal,3))
 	{
-	  //cout<<"channel "<<i<<" is a signal channel"<<endl;
+	  //cout<<"channel "<<i<<" is a background channel"<<endl;
 	  continue;
 	}
       else
@@ -124,7 +128,7 @@ int sumSignals(TH1F* &histSum, TH1F** hists, int channels, int signal[])
   histSum->Reset();
   
   for(int i=0;i<channels;i++)
-    if(is_in(i,signal))
+    if(is_in(i,signal,3))
       {
 	//cout<<"channel "<<i<<" is a signal channel"<<endl;
 	histSum->Add(hists[i],1);
@@ -148,7 +152,7 @@ int L_CM_pictures_M3_ver3()
   //printf("File opened successfully\n");
 
   const float scale_factor=50000*1000;
-  float scale[]={
+  float fscale[]={
     1840./scale_factor/10,//channel 01 //10 times bgger statistics
     69.61*0.0085*1.35/137/scale_factor,//channel 48
     69.61/5.34/scale_factor,//channel 49
@@ -159,10 +163,10 @@ int L_CM_pictures_M3_ver3()
     7.0/scale_factor/10,//channel 44 //10 times bgger statistics
     32.18*0.00054*1.35/137/scale_factor,//channel 50
     56.25*0.012*1.35*1/137/scale_factor,//channel 52
-    1.242e-1/scale_factor / 8.065167e-10,//channel 55 weight 8.065167e-10 set in PLUTO
-    24e-2/scale_factor / 8.065167e-10,//channel 56 weight 8.065167e-10 set in PLUTO
-    29e-4/scale_factor/ 8.065167e-10,//channel 57 weight 8.065167e-10 set in PLUTO
-    18.6e-4/scale_factor/ 8.065167e-10//channel 58 weight 8.065167e-10 set in PLUTO
+    1.242e-1/scale_factor ,//channel 55 weight 8.065167e-10 set in PLUTO
+    24e-2/scale_factor ,//channel 56 weight 8.065167e-10 set in PLUTO
+    29e-4/scale_factor,//channel 57 weight 8.065167e-10 set in PLUTO
+    18.6e-4/scale_factor//channel 58 weight 8.065167e-10 set in PLUTO
   };//ub
   
   TH1F *hL1520massDistZLpi0[fn];
@@ -227,7 +231,7 @@ int L_CM_pictures_M3_ver3()
 	  continue;
 	}
       hist_file->cd();
-      
+      cout<<"In file: "<<hist_file<<endl;
       hL1520massDistZLpi0[n]= (TH1F*)hist_file->Get("hL1520massDistZLpi0")->Clone();
       //hL1520massFTDistZLpi0[n]= (TH1F*)hist_file->Get("hL1520massFTDistZLpi0")->Clone();
       hL1520massFinalRLpi0[n]= (TH1F*)hist_file->Get("hL1520massFinalRLpi0")->Clone();
@@ -248,9 +252,31 @@ int L_CM_pictures_M3_ver3()
 
       hDLmassDistZL_epep[n]= (TH1F*)hist_file->Get("hDLmassDistZL_epep")->Clone();
       hDLmassDistZL_emem[n]= (TH1F*)hist_file->Get("hDLmassDistZL_emem")->Clone();
-
-      //call Sumw2 for all histograms
+      if(is_in(n,ur_background,4))//compensate wrong weight from pluto for certain channels
+	{
+	  //cout<<n<<" is o the list of channels with wrong weight"<<endl;
+	  hL1520massDistZLpi0[n]->Scale(1/8.065167e-10);
+	  //hL1520massFTDistZLpi0[n]->Scale(1/8.065167e-10);
+	  hL1520massFinalRLpi0[n]->Scale(1/8.065167e-10);
+	  hL1520massFTFinalRLpi0[n]->Scale(1/8.065167e-10);
+	  hL1520massFinalpi0[n]->Scale(1/8.065167e-10);
+	  hL1520massFTFinalpi0[n]->Scale(1/8.065167e-10);
       
+	  hL1520massFinalRLpi0_L[n]->Scale(1/8.065167e-10);
+	  hL1520massDistZLRLpi0_L[n]->Scale(1/8.065167e-10);
+
+	  hDLmassFinalRL_L[n]->Scale(1/8.065167e-10);
+	  hDLmassDistZL_L[n]->Scale(1/8.065167e-10);
+	  hDLmassDistZL[n]->Scale(1/8.065167e-10);
+	  hDLmassFTDistZL[n]->Scale(1/8.065167e-10);
+
+	  hL1520massDistZLpi0_epep[n]->Scale(1/8.065167e-10);
+	  hL1520massDistZLpi0_emem[n]->Scale(1/8.065167e-10);
+
+	  hDLmassDistZL_epep[n]->Scale(1/8.065167e-10);
+	  hDLmassDistZL_emem[n]->Scale(1/8.065167e-10);
+	}      
+      //call Sumw2 for all histograms  
        hL1520massDistZLpi0[n]->Sumw2();
       //hL1520massFTDistZLpi0[n]->Sumw2();
       hL1520massFinalRLpi0[n]->Sumw2();
@@ -271,7 +297,7 @@ int L_CM_pictures_M3_ver3()
 
       hDLmassDistZL_epep[n]->Sumw2();
       hDLmassDistZL_emem[n]->Sumw2();
-
+      
       n++;
     }
   //end of reading histograms*************************************************************************
@@ -280,24 +306,25 @@ int L_CM_pictures_M3_ver3()
   for(int k=0; k<n;k++)
     {
       int bins=10;
+      //cout<<"File number: "<<k<<endl<<"#######################"<<endl;
       //set colors
-          
-      sethist(hL1520massFinalpi0[k],k,bins,1,scale[k]);
-      sethist(hL1520massFTFinalpi0[k],k,bins,1,scale[k]);
-      sethist(hL1520massFinalRLpi0_L[k],k,bins,2,scale[k]);
-      sethist(hL1520massDistZLRLpi0_L[k],k,bins,2,scale[k]);
-      sethist(hL1520massDistZLpi0[k],k,bins,1,scale[k]);
-      //sethist(hL1520massFTDistZLpi0[k],k,bins,1,scale[k]);
+      //void sethist(TH1F* hist, int color=1, int rebin=1, int style=1, double sc=1)    
+      sethist(hL1520massFinalpi0[k],k,bins,1,fscale[k]);
+      sethist(hL1520massFTFinalpi0[k],k,bins,1,fscale[k]);
+      sethist(hL1520massFinalRLpi0_L[k],k,bins,2,fscale[k]);
+      sethist(hL1520massDistZLRLpi0_L[k],k,bins,2,fscale[k]);
+      sethist(hL1520massDistZLpi0[k],k,bins,1,fscale[k]);
+      //sethist(hL1520massFTDistZLpi0[k],k,bins,1,fscale[k]);
       
-      sethist(hDLmassFinalRL_L[k],k,bins,2,scale[k]);
-      sethist(hDLmassDistZL_L[k],k,bins,2,scale[k]);
-      sethist(hDLmassDistZL[k],k,bins,1,scale[k]);
-      sethist(hDLmassFTDistZL[k],k,bins,1,scale[k]);
+      sethist(hDLmassFinalRL_L[k],k,bins,2,fscale[k]);
+      sethist(hDLmassDistZL_L[k],k,bins,2,fscale[k]);
+      sethist(hDLmassDistZL[k],k,bins,1,fscale[k]);
+      sethist(hDLmassFTDistZL[k],k,bins,1,fscale[k]);
 
-      sethist(hL1520massDistZLpi0_emem[k],k,bins,1,scale[k]);
-      sethist(hL1520massDistZLpi0_epep[k],k,bins,1,scale[k]);
-      sethist(hDLmassDistZL_emem[k],k,bins,1,scale[k]);
-      sethist(hDLmassDistZL_epep[k],k,bins,1,scale[k]);
+      sethist(hL1520massDistZLpi0_emem[k],k,bins,1,fscale[k]);
+      sethist(hL1520massDistZLpi0_epep[k],k,bins,1,fscale[k]);
+      sethist(hDLmassDistZL_emem[k],k,bins,1,fscale[k]);
+      sethist(hDLmassDistZL_epep[k],k,bins,1,fscale[k]);
 
       //sum FW with HADES
       
@@ -309,6 +336,7 @@ int L_CM_pictures_M3_ver3()
     }
 
   cout<<"attempt to create sum of background channels"<<endl;
+  
   //calculate sum of all background channels
   
   calcBg(hL1520mass_background, hL1520massDistZLpi0, fn, signal_ch);
@@ -439,13 +467,13 @@ int L_CM_pictures_M3_ver3()
   double licznik;
   double m_min=140;
   double m_max=420;
-
+  
   hDLmass_FF->Multiply(fFormFactor);
   licznik=hDLmass_FF->Integral(hDLmass_FF->FindBin(m_min),hDLmass_FF->FindBin(m_max));
   mianownik=hDLmass_sum_all_signals->Integral(hDLmass_sum_all_signals->FindBin(m_min),hDLmass_sum_all_signals->FindBin(m_max));
   ff_const=licznik/mianownik;
   cout<<"************"<<endl<<"FF scaling factor="<<ff_const<<endl<<"***********"<<endl;
-  hL1520mass_FF->Scale(ff_const);
+  scale(hL1520mass_FF,ff_const);
   //**********************************
 
   gStyle->SetOptStat(0);
