@@ -152,21 +152,22 @@ int L_CM_pictures_M3_ver3()
   //printf("File opened successfully\n");
 
   const float scale_factor=50000*1000;
-  float fscale[]={
+  const double dp_dalitz=4.5e-5;
+  double fscale[]={
     1840./scale_factor/10,//channel 01 //10 times bgger statistics
     69.61*0.0085*1.35/137/scale_factor,//channel 48
     69.61/5.34/scale_factor,//channel 49
-    300/scale_factor,//channel 04
-    300/scale_factor,//channel 02
-    43/scale_factor,//channel 40
+    300.0/scale_factor,//channel 04
+    300.0/scale_factor,//channel 02
+    43.0/scale_factor,//channel 40
     10.0/scale_factor /10,//channel 42 //10 times bgger statistics
     7.0/scale_factor/10,//channel 44 //10 times bgger statistics
     32.18*0.00054*1.35/137/scale_factor,//channel 50
     56.25*0.012*1.35*1/137/scale_factor,//channel 52
-    1.242e-1/scale_factor ,//channel 55 weight 8.065167e-10 set in PLUTO
-    24e-2/scale_factor ,//channel 56 weight 8.065167e-10 set in PLUTO
-    29e-4/scale_factor,//channel 57 weight 8.065167e-10 set in PLUTO
-    18.6e-4/scale_factor//channel 58 weight 8.065167e-10 set in PLUTO
+    2760.0*dp_dalitz/scale_factor ,//channel 55 weight 8.065167e-10 set in PLUTO
+    450.0*dp_dalitz/scale_factor ,//channel 56 weight 8.065167e-10 set in PLUTO
+    64.*dp_dalitz/scale_factor,//channel 57 weight 8.065167e-10 set in PLUTO
+    41.5*dp_dalitz/scale_factor//channel 58 weight 8.065167e-10 set in PLUTO
   };//ub
   
   TH1F *hL1520massDistZLpi0[fn];
