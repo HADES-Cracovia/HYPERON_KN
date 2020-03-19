@@ -79,11 +79,14 @@ void sethist(TH1F* hist, int color=1, int rebin=1, int style=1, double sc=1)
     hist->SetLineColor(color);
   else
     hist->SetLineColor(40);
+  const double lum=1.4e32*60*60*24*31;
   
   //double binW=hist->GetBinWidth(10); //After re-binning
   hist->SetLineStyle(style);
+  hist->Scale(sc*lum*1e-30); //scailing to represent counts after whole beam-time, \mu b -> cm^2
+  hist->Sumw2();
+  scale(hist,1/lum*1e30);
   hist->Rebin(rebin);
-  scale(hist,sc);
   normalize(hist);//divide by the bin width
   hist->GetYaxis()->SetTitle("#frac{d #sigma}{d M} [#frac{#mu b}{MeV}]");
   //hist->Smooth();
@@ -151,7 +154,8 @@ int L_CM_pictures_M3_ver3()
   //if ( MyFile->IsOpen() )
   //printf("File opened successfully\n");
 
-  const float scale_factor=50000*1000;
+  
+  const double scale_factor=50000*1000;
   const double dp_dalitz=4.5e-5;
   double fscale[]={
     1840./scale_factor/10,//channel 01 //10 times bgger statistics
@@ -164,8 +168,8 @@ int L_CM_pictures_M3_ver3()
     7.0/scale_factor/10,//channel 44 //10 times bgger statistics
     32.18*0.00054*1.35/137/scale_factor,//channel 50
     56.25*0.012*1.35*1/137/scale_factor,//channel 52
-    2760.0*dp_dalitz/scale_factor ,//channel 55 weight 8.065167e-10 set in PLUTO
-    450.0*dp_dalitz/scale_factor ,//channel 56 weight 8.065167e-10 set in PLUTO
+    2760.0*dp_dalitz/scale_factor,//channel 55 weight 8.065167e-10 set in PLUTO
+    450.0*dp_dalitz/scale_factor,//channel 56 weight 8.065167e-10 set in PLUTO
     64.*dp_dalitz/scale_factor,//channel 57 weight 8.065167e-10 set in PLUTO
     41.5*dp_dalitz/scale_factor//channel 58 weight 8.065167e-10 set in PLUTO
   };//ub
@@ -278,7 +282,8 @@ int L_CM_pictures_M3_ver3()
 	  hDLmassDistZL_emem[n]->Scale(1/8.065167e-10);
 	}      
       //call Sumw2 for all histograms  
-       hL1520massDistZLpi0[n]->Sumw2();
+      /*
+      hL1520massDistZLpi0[n]->Sumw2();
       //hL1520massFTDistZLpi0[n]->Sumw2();
       hL1520massFinalRLpi0[n]->Sumw2();
       hL1520massFTFinalRLpi0[n]->Sumw2();
@@ -298,7 +303,7 @@ int L_CM_pictures_M3_ver3()
 
       hDLmassDistZL_epep[n]->Sumw2();
       hDLmassDistZL_emem[n]->Sumw2();
-      
+      */
       n++;
     }
   //end of reading histograms*************************************************************************
