@@ -20,17 +20,23 @@ void scale(TH1F* hist, double s)
   
   for (Int_t j=1; j<hist->GetNbinsX()+1; ++j)
     {
-      //if(hist->GetBinContent(j)<1 && hist->GetBinContent(j)!=0)
-	//cout<<"bin contnet: "<<hist->GetBinContent(j)<<" bin error: "<<hist->GetBinError(j)<<" scale "<<s<<endl;
       hist->SetBinContent( j, hist->GetBinContent(j)*s );
-      //hist->SetBinError( j, TMath::Sqrt( hist->GetBinContent(j) ) );
       hist->SetBinError( j, hist->GetBinError(j)*s );
-      //if(hist->GetBinContent(j)<1 && hist->GetBinContent(j)!=0)
-      //cout<<"bin contnet: "<<hist->GetBinContent(j)<<" bin error: "<<hist->GetBinError(j)<<endl<<endl;
     }
-  //cout<<"end of histogram"<<endl<<"********************"<<endl;
   
 }
+void scale(TH1F* hist, double s1, double s2)
+{
+  //hist->Scale(s);
+  
+  for (Int_t j=1; j<hist->GetNbinsX()+1; ++j)
+    {
+      hist->SetBinContent( j, hist->GetBinContent(j)*s1 );
+      hist->SetBinError( j, hist->GetBinError(j)*s2 );
+    }
+
+}
+
 
 bool is_in(int n, int signals[],int size)
 {
@@ -47,7 +53,7 @@ TH1F* renolmalize(TH1F* hist, double sc)
 {
   TH1F* temp =(TH1F*)hist->Clone("hist_renolmalize");
   temp->Rebin(sc);
-  scale(temp,1/sc);
+  scale(temp,1/sc,TMath::Sqrt(1/sc));
   return temp;
 }
 
@@ -79,15 +85,14 @@ void sethist(TH1F* hist, int color=1, int rebin=1, int style=1, double sc=1)
     hist->SetLineColor(color);
   else
     hist->SetLineColor(40);
-  const double lum=1.4e32*60*60*24*31;
-  
-  //double binW=hist->GetBinWidth(10); //After re-binning
+  //const double lum=1.4e32*60*60*24*31*0.5; //factor 05 because assumed duty-cycle
+  const double lum=2e31*60*60*24*31*0.5;  //double binW=hist->GetBinWidth(10); //After re-binning
   hist->SetLineStyle(style);
   hist->Scale(sc*lum*1e-30); //scailing to represent counts after whole beam-time, \mu b -> cm^2
   hist->Sumw2();
-  scale(hist,1/lum*1e30);
+  //scale(hist,1/lum*1e30);
   hist->Rebin(rebin);
-  normalize(hist);//divide by the bin width
+  //normalize(hist);//divide by the bin width
   hist->GetYaxis()->SetTitle("#frac{d #sigma}{d M} [#frac{#mu b}{MeV}]");
   //hist->Smooth();
 }
@@ -542,10 +547,10 @@ int L_CM_pictures_M3_ver3()
   entry->SetTextFont(42);
   entry=leg->AddEntry(hL1520massDistZLpi0[1],"#Lambda(1520) #rightarrow #Lambda e^{+}e^{-}","lpf");
   entry->SetTextFont(42);
-  entry=leg->AddEntry(hL1520massDistZLpi0[9],"#Lambda(1405) #rightarrow #Lambda e^{+}e^{-}","lpf");
+  entry=leg->AddEntry(hL1520massDistZLpi0[8],"#Lambda(1405) #rightarrow #Lambda e^{+}e^{-}","lpf");
   entry->SetFillStyle(1001);
   entry->SetTextFont(42);
-  entry=leg->AddEntry(hL1520massDistZLpi0[8],"#Sigma(1385) #rightarrow #Lambda e^{+}e^{-}","lpf");
+  entry=leg->AddEntry(hL1520massDistZLpi0[9],"#Sigma(1385) #rightarrow #Lambda e^{+}e^{-}","lpf");
   entry->SetTextFont(42);
   entry=leg->AddEntry(hL1520_delta,"#Delta #rightarrow N e^{+} e^{-}","lpf");
   entry->SetTextFont(42);
