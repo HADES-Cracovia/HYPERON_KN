@@ -85,8 +85,8 @@ void sethist(TH1F* hist, int color=1, int rebin=1, int style=1, double sc=1)
     hist->SetLineColor(color);
   else
     hist->SetLineColor(40);
-  //const double lum=1.4e32*60*60*24*31*0.5; //factor 05 because assumed duty-cycle
-  const double lum=2e31*60*60*24*31*0.5;  //double binW=hist->GetBinWidth(10); //After re-binning
+  const double lum=1.4e32*60*60*24*31*0.5; //factor 05 because assumed duty-cycle
+  //const double lum=2e31*60*60*24*31*0.5;  //double binW=hist->GetBinWidth(10); //After re-binning
   hist->SetLineStyle(style);
   hist->Scale(sc*lum*1e-30); //scailing to represent counts after whole beam-time, \mu b -> cm^2
   hist->Sumw2();

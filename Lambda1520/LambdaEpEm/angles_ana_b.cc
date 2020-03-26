@@ -1282,7 +1282,7 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 		    int flagDil=0;
 		    
 		    //if(ep[s]->getGeantParentTrackNum()==0 && em[ss]->getGeantParentTrackNum()==0 && ep[s]->getGeantGrandParentPID()==-1 && em[ss]->getGeantGrandParentPID()==-1) flagDil=1;
-		    if(ep[s]->getGeantParentTrackNum()== em[ss]->getGeantParentTrackNum() /*&& em[s]->getGeantParentPID()==7*/)
+		    if(ep[s]->getGeantParentTrackNum()== em[ss]->getGeantParentTrackNum() && em[s]->getGeantParentPID()==7)
 		      flagDil=1;
 		    //cout<<"yyy "<<   ep[s]->getGeantParentTrackNum()<<" "<< em[ss]->getGeantParentTrackNum()<<endl;
 		   
@@ -1826,7 +1826,7 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 		    int flagDil=0;
 
 		    //if(ep[s]->getGeantParentTrackNum()==0 && em[ss]->getGeantParentTrackNum()==0 && ep[s]->getGeantGrandParentPID()==-1 && em[ss]->getGeantGrandParentPID()==-1) flagDil=1;
-		    if(ep[s]->getGeantParentTrackNum()==em[ss]->getGeantParentTrackNum() /*&& em[s]->getGeantParentPID()==7*/)
+		    if(ep[s]->getGeantParentTrackNum()==em[ss]->getGeantParentTrackNum() && em[s]->getGeantParentPID()==7)
 		      flagDil=1;
 			      
 		    TLorentzVector lvLambda=*pFT[j]+*pimH[k];
