@@ -6,7 +6,7 @@ directory="../output_newGeometryM3_ver3_pi0/" #oryginal data directory
 fname="../files_list_k.dat"
 
 import subprocess
-print("Copy and hadd files from \"output_newGeometryM3_ver3\" directory")
+print("Copy and hadd files from \"output_newGeometryM3_ver3_pi0\" directory")
 import time
 import os
 
