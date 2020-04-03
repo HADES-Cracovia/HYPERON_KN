@@ -73,6 +73,13 @@ TH1F* renolmalize(TH1F* hist, double sc)
   return temp;
 }
 
+void renolmalize_this_histogram(TH1F* hist, double sc)
+{
+  hist->Rebin(sc);
+  scale(hist,1/sc,TMath::Sqrt(1/sc));
+}
+
+
 int sum_background(TH1F* &hist, TH1F* back1, TH1F* back2)
 {
   if(back1->GetNbinsX()!=back2->GetNbinsX())
@@ -517,13 +524,18 @@ int L_CM_pictures_M3_ver3()
   hL1520mass_background->Add(hL1520_delta,-1);
   hL1520mass_background->GetXaxis()->SetTitle("M_{#Lambda^{0} e^{+} e^{-}} [MeV c^{-2}]");
   
-  TH1F* sum_renormalize=renolmalize(hL1520mass_background,2);
-  TH1F* CM_background=renolmalize(hL1520mass_sum_CBbackground,2);
+  TH1F* sum_renormalize=renolmalize(hL1520mass_background,1);
+  TH1F* CM_background=renolmalize(hL1520mass_sum_CBbackground,1);
+  sum_renormalize->Smooth();
+
   //hL1520mass_FF->Draw("same");
   //hL1520mass_FF->SetLineStyle(2);
   //hL1520mass_FF->SetLineColor(kGreen);
   if(includeD)
+    {
     hL1520mass_sum_all_signals->Add(hL1520_delta,1);
+    hL1520mass_sum_all_signals->Add(sum_renormalize,1);
+    }
   hL1520mass_sum_all_signals->GetXaxis()->SetTitle("M_{#Lambda^{0} e^{+} e^{-}} [MeV]");
   hL1520mass_sum_all_signals->Draw("same");
   //hL1520mass_sum_all_signals->SetLineWidth(2);
@@ -546,15 +558,15 @@ int L_CM_pictures_M3_ver3()
   format_sumSignals(hL1520mass_sum_all_signals);
   
   sum_renormalize->Draw("psame");
-  sum_renormalize->Smooth();
-   //CM_background->Draw("same");
+  //CM_background->Draw("same");
   //CM_background->SetLineColor(kBlue);
   hL1520massDistZLpi0[1]->Draw("same");
   hL1520massDistZLpi0[8]->Draw("same");
   hL1520massDistZLpi0[9]->Draw("same");
   hL1520_delta->Draw("same");
-  hL1520_delta->SetLineWidth(3);
+  //hL1520_delta->SetLineWidth(3);
 
+  format_delta(hL1520_delta);
   format_l1520(hL1520massDistZLpi0[1]);
   format_s1385(hL1520massDistZLpi0[8]);
   format_l1405(hL1520massDistZLpi0[9]);
@@ -563,7 +575,7 @@ int L_CM_pictures_M3_ver3()
   TLegend *leg = new TLegend(0.7,0.5,0.85,0.85,NULL,"brNDC");
   leg->SetBorderSize(0);
   leg->SetTextSize(0.027);
-  TLegendEntry *entry=leg->AddEntry(hL1520mass_sum_all_signals,"signal #rightarrow #Lambda e^{+}e^{-}","lpf");
+  TLegendEntry *entry=leg->AddEntry(hL1520mass_sum_all_signals,"all channels","lpf");
   entry->SetFillStyle(1001);
   entry->SetTextFont(42);
   entry=leg->AddEntry(hL1520massDistZLpi0[1],"#Lambda(1520) #rightarrow #Lambda e^{+}e^{-}","lpf");
@@ -629,7 +641,12 @@ gPad->SetMargin(0.20, 0.05, 0.15, 0.1);//(l,r,b,t)
   */
   hDLmass_background_renolmalize->Draw("psame");
   if(includeD)
+    {
     hDLmass_sum_all_signals->Add(hDLmass_delta,1);
+    hDLmass_sum_all_signals->Add(hDLmass_sum,1);
+    hDLmass_sum_all_signals->Add(hDLmass_sum_right_vertex,1);
+    renolmalize_this_histogram(hDLmass_sum_all_signals,2);
+    }
   hDLmass_sum_all_signals->Draw("same");
 
   
@@ -643,7 +660,7 @@ gPad->SetMargin(0.20, 0.05, 0.15, 0.1);//(l,r,b,t)
   //hDLmass_FF->SetLineStyle(3);
   //hDLmass_FF->SetLineColor(kGreen);
   hDLmass_delta->Draw("same");
-  hDLmass_delta->SetLineWidth(3);
+  //hDLmass_delta->SetLineWidth(3);
   
   hDLmassDistZL[signal_ch[1]]=renolmalize(hDLmassDistZL[signal_ch[1]],2); //rebin L1405
   //draw signal channels
@@ -654,6 +671,7 @@ gPad->SetMargin(0.20, 0.05, 0.15, 0.1);//(l,r,b,t)
       hDLmassDistZL[signal_ch[j]]->SetLineWidth(3);
     }
 
+  format_delta(hDLmass_delta);
   format_sumSignals(hDLmass_sum_all_signals);
   format_pi0(hDLmass_sum_right_vertex);
   format_l1520(hDLmassDistZL[signal_ch[0]]);
@@ -664,7 +682,7 @@ gPad->SetMargin(0.20, 0.05, 0.15, 0.1);//(l,r,b,t)
   TLegend *leg1 = new TLegend(0.7,0.5,0.85,0.85,NULL,"brNDC");
   leg1->SetBorderSize(0);
   leg1->SetTextSize(0.027);
-  TLegendEntry *entry=leg1->AddEntry(hL1520mass_sum_all_signals,"signal #rightarrow #Lambda e^{+}e^{-}","lpf");
+  TLegendEntry *entry=leg1->AddEntry(hL1520mass_sum_all_signals,"all channeles","lpf");
   entry->SetFillStyle(1001);
   entry->SetTextFont(42);
   entry=leg1->AddEntry(hL1520massDistZLpi0[1],"#Lambda(1520) #rightarrow #Lambda e^{+}e^{-}","lpf");
