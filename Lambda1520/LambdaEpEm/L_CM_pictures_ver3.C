@@ -2,28 +2,83 @@
 #include <string>
 #include <fstream>
 #include <algorithm>
-bool is_in(int n, int signals[])
-{
-  size_t myArraySize = sizeof(signals) / sizeof(int);
-  int *end = signals + myArraySize;
-  // find the value 0:
-  int *result = std::find(signals, end, n);
-  if(signals[myArraySize]==n)
-    return 1;
+#include <format_histograms.C>
 
-  if (result != end)
-    return 1;
-  else
-    return 0;
+void clean(TH1F* hist)
+{
+  //hist->Scale(s);
+  
+  for (Int_t j=1; j<hist->GetNbinsX()+1; ++j)
+    {
+      double cont=hist->GetBinContent(j);
+      if(cont<1)
+	{
+	  hist->SetBinContent( j, 0);
+	  hist->SetBinError( j, 0);
+	}
+    }
+  
 }
 
-TH1F* renolmalize(TH1F* hist, double scale)
+void normalize(TH1* hist) //divide by bin width with proper error propagation
+{
+  for (Int_t j=1; j<hist->GetNbinsX()+1; ++j)
+    {
+      hist->SetBinContent( j, hist->GetBinContent(j) / hist->GetBinWidth(j) );
+      //         hist->SetBinError( j, TMath::Sqrt( hist->GetBinContent(j) ) );
+      hist->SetBinError( j, hist->GetBinError(j) / hist->GetBinWidth(j) );
+    }
+}
+
+void scale(TH1F* hist, double s)
+{
+  //hist->Scale(s);
+  
+  for (Int_t j=1; j<hist->GetNbinsX()+1; ++j)
+    {
+      hist->SetBinContent( j, hist->GetBinContent(j)*s );
+      hist->SetBinError( j, hist->GetBinError(j)*s );
+    }
+  
+}
+void scale(TH1F* hist, double s1, double s2)
+{
+  //hist->Scale(s);
+  
+  for (Int_t j=1; j<hist->GetNbinsX()+1; ++j)
+    {
+      hist->SetBinContent( j, hist->GetBinContent(j)*s1 );
+      hist->SetBinError( j, hist->GetBinError(j)*s2 );
+    }
+
+}
+
+
+bool is_in(int n, int signals[],int size)
+{
+  //cout<<"n "<<n<<" signals "<<signals<<endl;
+  for(int i=0; i<size;i++)
+    {
+      if(n==signals[i])
+	return true;
+    }
+  return false;
+}
+
+TH1F* renolmalize(TH1F* hist, double sc)
 {
   TH1F* temp =(TH1F*)hist->Clone("hist_renolmalize");
-  temp->Rebin(scale);
-  temp->Scale(1/scale);
+  temp->Rebin(sc);
+  scale(temp,1/sc,TMath::Sqrt(1/sc));
   return temp;
 }
+
+void renolmalize_this_histogram(TH1F* hist, double sc)
+{
+  hist->Rebin(sc);
+  scale(hist,1/sc,TMath::Sqrt(1/sc));
+}
+
 
 int sum_background(TH1F* &hist, TH1F* back1, TH1F* back2)
 {
@@ -42,26 +97,34 @@ int sum_background(TH1F* &hist, TH1F* back1, TH1F* back2)
     {
       //cout<<j;
       hist->SetBinContent(j, 2*TMath::Sqrt(back1->GetBinContent(j)*back2->GetBinContent(j)));
-      //hist->SetBinError(j, TMath::Sqrt( back1->GetBinError(j)*back1->GetBinError(j)+back2->GetBinError(j)*back2->GetBinError(j) ));
+      hist->SetBinError(j, TMath::Sqrt( back1->GetBinError(j)*back1->GetBinError(j)+back2->GetBinError(j)*back2->GetBinError(j) ));
     }
   return 1;
 }
 
-void sethist(TH1F* hist, int color=1, int rebin=1, int style=1, double scale=1)
+void sethist(TH1F* hist, int color=1, int rebin=1, int style=1, double sc=1)
 {
   if(color!=0 && color!=10)//avoid white color
     hist->SetLineColor(color);
   else
     hist->SetLineColor(40);
-  hist->Rebin(rebin);
+  const double lum=7.5/10*1.4e32*60*60*24*28*0.5; //factor 0.5 because assumed duty-cycle
+  //const double lum=2e31*60*60*24*28*0.5;  //double binW=hist->GetBinWidth(10); //After re-binning
   hist->SetLineStyle(style);
-  hist->Scale(scale);
+  hist->Scale(sc*lum*1e-30); //scailing to represent counts after whole beam-time, \mu b -> cm^2
+  hist->Rebin(2);
+  hist->Sumw2();
+  //clean(hist);
+  scale(hist,1/lum*1e30);
+  hist->Rebin(rebin);
+  normalize(hist);//divide by the bin width
+  hist->GetYaxis()->SetTitle("#frac{d #sigma}{d M} [#frac{#mu b}{MeV}]");
   //hist->Smooth();
 }
 
 int calcBg(TH1F* &histBG, TH1F** hists, int channels, int signal[])
 {
-  if(!is_in(0,signal))
+  if(!is_in(0,signal,3))
     histBG=(TH1F*)hists[0]->Clone("background");
   else
     histBG=(TH1F*)hists[1]->Clone("background");
@@ -70,9 +133,9 @@ int calcBg(TH1F* &histBG, TH1F** hists, int channels, int signal[])
   
   for(int i=0;i<channels;i++)
     {
-      if(is_in(i,signal))
+      if(is_in(i,signal,3))
 	{
-	  //cout<<"channel "<<i<<" is a signal channel"<<endl;
+	  //cout<<"channel "<<i<<" is a background channel"<<endl;
 	  continue;
 	}
       else
@@ -98,7 +161,7 @@ int sumSignals(TH1F* &histSum, TH1F** hists, int channels, int signal[])
   histSum->Reset();
   
   for(int i=0;i<channels;i++)
-    if(is_in(i,signal))
+    if(is_in(i,signal,3))
       {
 	//cout<<"channel "<<i<<" is a signal channel"<<endl;
 	histSum->Add(hists[i],1);
@@ -110,32 +173,36 @@ int L_CM_pictures_ver3()
 {
   const int fn=14;//number of files in "infile"
   const int signal_ch[]={1,8,9};//list of signal channels in "infile" file, starting from 0
-  const int ur_background[]={10,11,12,13};
+  const int ur_background[]={10,11,12,13};//List of \Delta files
+  bool includeD =0;//do I want include \Deltas to sum of signal channels
   std::ifstream infile("files_list_k.dat");//list of histograms
   std::string file;
   //std::string directory="/lustre/nyx/hades/user/iciepal/Lambda1520_ic/";//directory comon for all files
-  std::string directory="./results_ver3/";//directory comon for all files
+  std::string directory="./results_new_geometry_3/";//directory comon for all files
   int n=0;
   //write everything to file
   //TFile *MyFile = new TFile("output.root","recreate");
   //if ( MyFile->IsOpen() )
   //printf("File opened successfully\n");
-    
-  float scale[]={
-    1840./10,//channel 01 //10 times bgger statistics
-    130.*7.8e-5,//channel 48
-    130./5.34,//channel 49
-    300,//channel 04
-    300,//channel 02
-    43,//channel 40
-    10 /10,//channel 42 //10 times bgger statistics
-    7/10,//channel 44 //10 times bgger statistics
-    8.84e-4,//channel 50
-    7.59e-3,//channel 52
-    1.242e-1 / 8.065167e-10,//channel 55 weight 8.065167e-10 set in PLUTO
-    24e-2 / 8.065167e-10,//channel 56 weight 8.065167e-10 set in PLUTO
-    29e-4/ 8.065167e-10,//channel 57 weight 8.065167e-10 set in PLUTO
-    18.6e-4/ 8.065167e-10//channel 58 weight 8.065167e-10 set in PLUTO
+
+  
+  const double scale_factor=50000*1000;
+  const double dp_dalitz=4.5e-5;
+  double fscale[]={
+    1840./scale_factor/10,//channel 01 //10 times bgger statistics
+    69.61*0.0085*1.35/137/scale_factor,//channel 48
+    69.61/5.34/scale_factor,//channel 49
+    300.0/scale_factor,//channel 04
+    300.0/scale_factor,//channel 02
+    43.0/scale_factor,//channel 40
+    10.0/scale_factor /10,//channel 42 //10 times bgger statistics
+    7.0/scale_factor/10,//channel 44 //10 times bgger statistics
+    32.18*0.00054*1.35/137/scale_factor,//channel 50
+    56.25*0.012*1.35*1/137/scale_factor,//channel 52
+    2760.0*dp_dalitz/scale_factor,//channel 55 weight 8.065167e-10 set in PLUTO
+    450.0*dp_dalitz/scale_factor,//channel 56 weight 8.065167e-10 set in PLUTO
+    64.*dp_dalitz/scale_factor,//channel 57 weight 8.065167e-10 set in PLUTO
+    41.5*dp_dalitz/scale_factor//channel 58 weight 8.065167e-10 set in PLUTO
   };//ub
   
   TH1F *hL1520massDistZLpi0[fn];
@@ -200,7 +267,7 @@ int L_CM_pictures_ver3()
 	  continue;
 	}
       hist_file->cd();
-      
+      cout<<"In file: "<<hist_file<<endl;
       hL1520massDistZLpi0[n]= (TH1F*)hist_file->Get("hL1520massDistZLpi0")->Clone();
       //hL1520massFTDistZLpi0[n]= (TH1F*)hist_file->Get("hL1520massFTDistZLpi0")->Clone();
       hL1520massFinalRLpi0[n]= (TH1F*)hist_file->Get("hL1520massFinalRLpi0")->Clone();
@@ -221,7 +288,53 @@ int L_CM_pictures_ver3()
 
       hDLmassDistZL_epep[n]= (TH1F*)hist_file->Get("hDLmassDistZL_epep")->Clone();
       hDLmassDistZL_emem[n]= (TH1F*)hist_file->Get("hDLmassDistZL_emem")->Clone();
+      if(is_in(n,ur_background,4))//compensate wrong weight from pluto for certain channels
+	{
+	  //cout<<n<<" is o the list of channels with wrong weight"<<endl;
+	  hL1520massDistZLpi0[n]->Scale(1/8.065167e-10);
+	  //hL1520massFTDistZLpi0[n]->Scale(1/8.065167e-10);
+	  hL1520massFinalRLpi0[n]->Scale(1/8.065167e-10);
+	  hL1520massFTFinalRLpi0[n]->Scale(1/8.065167e-10);
+	  hL1520massFinalpi0[n]->Scale(1/8.065167e-10);
+	  hL1520massFTFinalpi0[n]->Scale(1/8.065167e-10);
       
+	  hL1520massFinalRLpi0_L[n]->Scale(1/8.065167e-10);
+	  hL1520massDistZLRLpi0_L[n]->Scale(1/8.065167e-10);
+
+	  hDLmassFinalRL_L[n]->Scale(1/8.065167e-10);
+	  hDLmassDistZL_L[n]->Scale(1/8.065167e-10);
+	  hDLmassDistZL[n]->Scale(1/8.065167e-10);
+	  hDLmassFTDistZL[n]->Scale(1/8.065167e-10);
+
+	  hL1520massDistZLpi0_epep[n]->Scale(1/8.065167e-10);
+	  hL1520massDistZLpi0_emem[n]->Scale(1/8.065167e-10);
+
+	  hDLmassDistZL_epep[n]->Scale(1/8.065167e-10);
+	  hDLmassDistZL_emem[n]->Scale(1/8.065167e-10);
+	}      
+      //call Sumw2 for all histograms  
+      /*
+      hL1520massDistZLpi0[n]->Sumw2();
+      //hL1520massFTDistZLpi0[n]->Sumw2();
+      hL1520massFinalRLpi0[n]->Sumw2();
+      hL1520massFTFinalRLpi0[n]->Sumw2();
+      hL1520massFinalpi0[n]->Sumw2();
+      hL1520massFTFinalpi0[n]->Sumw2();
+      
+      hL1520massFinalRLpi0_L[n]->Sumw2();
+      hL1520massDistZLRLpi0_L[n]->Sumw2();
+
+      hDLmassFinalRL_L[n]->Sumw2();
+      hDLmassDistZL_L[n]->Sumw2();
+      hDLmassDistZL[n]->Sumw2();
+      hDLmassFTDistZL[n]->Sumw2();
+
+      hL1520massDistZLpi0_epep[n]->Sumw2();
+      hL1520massDistZLpi0_emem[n]->Sumw2();
+
+      hDLmassDistZL_epep[n]->Sumw2();
+      hDLmassDistZL_emem[n]->Sumw2();
+      */
       n++;
     }
   //end of reading histograms*************************************************************************
@@ -230,24 +343,25 @@ int L_CM_pictures_ver3()
   for(int k=0; k<n;k++)
     {
       int bins=10;
+      //cout<<"File number: "<<k<<endl<<"#######################"<<endl;
       //set colors
-          
-      sethist(hL1520massFinalpi0[k],k,bins,1,scale[k]);
-      sethist(hL1520massFTFinalpi0[k],k,bins,1,scale[k]);
-      sethist(hL1520massFinalRLpi0_L[k],k,bins,2,scale[k]);
-      sethist(hL1520massDistZLRLpi0_L[k],k,bins,2,scale[k]);
-      sethist(hL1520massDistZLpi0[k],k,bins,1,scale[k]);
-      //sethist(hL1520massFTDistZLpi0[k],k,bins,1,scale[k]);
+      //void sethist(TH1F* hist, int color=1, int rebin=1, int style=1, double sc=1)    
+      sethist(hL1520massFinalpi0[k],k,bins,1,fscale[k]);
+      sethist(hL1520massFTFinalpi0[k],k,bins,1,fscale[k]);
+      sethist(hL1520massFinalRLpi0_L[k],k,bins,2,fscale[k]);
+      sethist(hL1520massDistZLRLpi0_L[k],k,bins,2,fscale[k]);
+      sethist(hL1520massDistZLpi0[k],k,bins,1,fscale[k]);
+      //sethist(hL1520massFTDistZLpi0[k],k,bins,1,fscale[k]);
       
-      sethist(hDLmassFinalRL_L[k],k,bins,2,scale[k]);
-      sethist(hDLmassDistZL_L[k],k,bins,2,scale[k]);
-      sethist(hDLmassDistZL[k],k,bins,1,scale[k]);
-      sethist(hDLmassFTDistZL[k],k,bins,1,scale[k]);
+      sethist(hDLmassFinalRL_L[k],k,bins,2,fscale[k]);
+      sethist(hDLmassDistZL_L[k],k,bins,2,fscale[k]);
+      sethist(hDLmassDistZL[k],k,bins,1,fscale[k]);
+      sethist(hDLmassFTDistZL[k],k,bins,1,fscale[k]);
 
-      sethist(hL1520massDistZLpi0_emem[k],k,bins,1,scale[k]);
-      sethist(hL1520massDistZLpi0_epep[k],k,bins,1,scale[k]);
-      sethist(hDLmassDistZL_emem[k],k,bins,1,scale[k]);
-      sethist(hDLmassDistZL_epep[k],k,bins,1,scale[k]);
+      sethist(hL1520massDistZLpi0_emem[k],k,bins,1,fscale[k]);
+      sethist(hL1520massDistZLpi0_epep[k],k,bins,1,fscale[k]);
+      sethist(hDLmassDistZL_emem[k],k,bins,1,fscale[k]);
+      sethist(hDLmassDistZL_epep[k],k,bins,1,fscale[k]);
 
       //sum FW with HADES
       
@@ -259,6 +373,7 @@ int L_CM_pictures_ver3()
     }
 
   cout<<"attempt to create sum of background channels"<<endl;
+  
   //calculate sum of all background channels
   
   calcBg(hL1520mass_background, hL1520massDistZLpi0, fn, signal_ch);
@@ -313,7 +428,8 @@ int L_CM_pictures_ver3()
   TCanvas *cPictures = new TCanvas("cPictures","cPictures");
 
   cPictures->Divide(3,2);
-  double ymin=1e-4; //min value for y axis  
+  double ymin=1e-12; //min value for y axis
+  double ymax=1e-4;
     
   cPictures->cd(1);
   gPad->SetLogy();
@@ -331,8 +447,8 @@ int L_CM_pictures_ver3()
 
   cPictures->cd(2);
   gPad->SetLogy();
-  hDLmassDistZL[0]->GetYaxis()->SetRangeUser(ymin,10e5);
-  hDLmassDistZLRL_L[0]->GetYaxis()->SetRangeUser(ymin,10e5);
+  hDLmassDistZL[0]->GetYaxis()->SetRangeUser(ymin,ymax);
+  hDLmassDistZLRL_L[0]->GetYaxis()->SetRangeUser(ymin,ymax);
   for(int x=0;x<n;x++)
     {
       hDLmassDistZL[x]->Draw("same");
@@ -353,7 +469,7 @@ int L_CM_pictures_ver3()
 
   cPictures->cd(4);
   gPad->SetLogy();
-  hDLmassDistZL_emem[0]->GetYaxis()->SetRangeUser(ymin,10e4);
+  hDLmassDistZL_emem[0]->GetYaxis()->SetRangeUser(ymin,ymax);
   for(int x=0; x<n; x++)
     {
       //hL1520massDistZLpi0_epep[x]->Draw("same");
@@ -365,7 +481,7 @@ int L_CM_pictures_ver3()
   
   cPictures->cd(5);
   gPad->SetLogy();
-  hDLmassDistZL_epep[0]->GetYaxis()->SetRangeUser(ymin,10e4);
+  hDLmassDistZL_epep[0]->GetYaxis()->SetRangeUser(ymin,ymax);
   for(int x=0; x<n; x++)
     {
       hDLmassDistZL_epep[x]->Draw("same");
@@ -388,92 +504,204 @@ int L_CM_pictures_ver3()
   double licznik;
   double m_min=140;
   double m_max=420;
-
+  
   hDLmass_FF->Multiply(fFormFactor);
   licznik=hDLmass_FF->Integral(hDLmass_FF->FindBin(m_min),hDLmass_FF->FindBin(m_max));
   mianownik=hDLmass_sum_all_signals->Integral(hDLmass_sum_all_signals->FindBin(m_min),hDLmass_sum_all_signals->FindBin(m_max));
   ff_const=licznik/mianownik;
   cout<<"************"<<endl<<"FF scaling factor="<<ff_const<<endl<<"***********"<<endl;
-  hL1520mass_FF->Scale(ff_const);
+  scale(hL1520mass_FF,ff_const);
   //**********************************
 
+  gStyle->SetOptStat(0);
+  
   //L1520 SPECTRUM
   
   TCanvas* cFinalL1520=new TCanvas("cFinalL1520","cFinalL1520");
   cFinalL1520->cd();
-
+  //cFinalL1520->SetCanvasSize(700,400);
+  gPad->SetMargin(0.15, 0.05, 0.15, 0.09);//(l,r,b,t)
   hL1520mass_background->Add(hL1520_delta,-1);
-  hL1520mass_background->GetXaxis()->SetTitle("M_{#Lambda^{0} e^{+} e^{-}} [MeV]");
+  hL1520mass_background->GetXaxis()->SetTitle("M_{#Lambda^{0} e^{+} e^{-}} [MeV c^{-2}]");
   
-  TH1F* sum_renormalize=renolmalize(hL1520mass_background,4);
-  TH1F* CM_background=renolmalize(hL1520mass_sum_CBbackground,4);
+  TH1F* sum_renormalize=renolmalize(hL1520mass_background,1);
+  TH1F* CM_background=renolmalize(hL1520mass_sum_CBbackground,1);
+  sum_renormalize->Smooth();
+
   //hL1520mass_FF->Draw("same");
   //hL1520mass_FF->SetLineStyle(2);
   //hL1520mass_FF->SetLineColor(kGreen);
+  if(includeD)
+    {
+    hL1520mass_sum_all_signals->Add(hL1520_delta,1);
+    hL1520mass_sum_all_signals->Add(sum_renormalize,1);
+    }
   hL1520mass_sum_all_signals->GetXaxis()->SetTitle("M_{#Lambda^{0} e^{+} e^{-}} [MeV]");
   hL1520mass_sum_all_signals->Draw("same");
-  hL1520mass_sum_all_signals->SetLineWidth(2);
-  hL1520mass_sum_all_signals->SetLineColor(kGreen);
-  sum_renormalize->Draw("same");
-  sum_renormalize->Smooth();
+  //hL1520mass_sum_all_signals->SetLineWidth(2);
+  //hL1520mass_sum_all_signals->SetLineColor(kYellow-6);
+  hL1520mass_sum_all_signals->SetTitle("Y #rightarrow #Lambda e^{+}e^{-}");
+   hL1520mass_sum_all_signals->GetXaxis()->SetRangeUser(1200,1800);
+  hL1520mass_sum_all_signals->GetXaxis()->SetLabelFont(42);
+  hL1520mass_sum_all_signals->GetXaxis()->SetNdivisions(505);
+  hL1520mass_sum_all_signals->GetXaxis()->SetLabelSize(0.04);
+  hL1520mass_sum_all_signals->GetXaxis()->SetTitleSize(0.05);
+  hL1520mass_sum_all_signals->GetXaxis()->SetTitleOffset(1.1);
+  hL1520mass_sum_all_signals->GetXaxis()->SetTitleFont(42);
+  hL1520mass_sum_all_signals->GetYaxis()->SetTitle("#frac{d#sigma}{dM_{#Lambda^{0} e^{+}e^{-}}} #left[#frac{#mub}{MeV c^{-2}} #right]");
+  hL1520mass_sum_all_signals->GetYaxis()->SetLabelFont(42);
+  hL1520mass_sum_all_signals->GetYaxis()->SetLabelSize(0.04);
+  hL1520mass_sum_all_signals->GetYaxis()->SetTitleOffset(1.15);
+  hL1520mass_sum_all_signals->GetYaxis()->SetTitleSize(0.05);
+  hL1520mass_sum_all_signals->GetYaxis()->SetTitleFont(42);
+
+  format_sumSignals(hL1520mass_sum_all_signals);
+  
+  sum_renormalize->Draw("psame");
   //CM_background->Draw("same");
   //CM_background->SetLineColor(kBlue);
   hL1520massDistZLpi0[1]->Draw("same");
   hL1520massDistZLpi0[8]->Draw("same");
   hL1520massDistZLpi0[9]->Draw("same");
   hL1520_delta->Draw("same");
-  hL1520_delta->SetLineWidth(2);
+  //hL1520_delta->SetLineWidth(3);
 
+  format_delta(hL1520_delta);
+  format_l1520(hL1520massDistZLpi0[1]);
+  format_s1385(hL1520massDistZLpi0[8]);
+  format_l1405(hL1520massDistZLpi0[9]);
+  format_cb(sum_renormalize);
+
+  TLegend *leg = new TLegend(0.7,0.5,0.85,0.85,NULL,"brNDC");
+  leg->SetBorderSize(0);
+  leg->SetTextSize(0.027);
+  TLegendEntry *entry=leg->AddEntry(hL1520mass_sum_all_signals,"all channels","lpf");
+  entry->SetFillStyle(1001);
+  entry->SetTextFont(42);
+  entry=leg->AddEntry(hL1520massDistZLpi0[1],"#Lambda(1520) #rightarrow #Lambda e^{+}e^{-}","lpf");
+  entry->SetTextFont(42);
+  entry=leg->AddEntry(hL1520massDistZLpi0[8],"#Lambda(1405) #rightarrow #Lambda e^{+}e^{-}","lpf");
+  entry->SetFillStyle(1001);
+  entry->SetTextFont(42);
+  entry=leg->AddEntry(hL1520massDistZLpi0[9],"#Sigma(1385) #rightarrow #Lambda e^{+}e^{-}","lpf");
+  entry->SetTextFont(42);
+  entry=leg->AddEntry(hL1520_delta,"#Delta #rightarrow N e^{+} e^{-}","lpf");
+  entry->SetTextFont(42);
+  entry=leg->AddEntry(sum_renormalize,"CB","lpf");
+  entry->SetTextFont(42);
+  leg->Draw();
+  
+  
+  cFinalL1520->Update();
 
   //dI-LEPTON SPECTRUM
   
   TCanvas* cFinalDL_cb=new TCanvas("cFinalDL_cb","cFinalDL_cb");
-  gPad->SetLogy();
   TH1F* hDLmass_CB=(TH1F*)hDLmass_sum->Clone("CBbackground");
   hDLmass_CB->Add(hDLmass_sum_right_vertex,-1);
   hDLmass_CB->Smooth();
   TH1F* hDLmass_background_renolmalize=renolmalize(hDLmass_CB,2);
   TH1F* hDLmass_sum_background_re=renolmalize(hDLmass_sum_background,2);
   TH1F* hDLmass_sum_renolmalize=renolmalize(hDLmass_sum,2);
-
+gPad->SetMargin(0.20, 0.05, 0.15, 0.1);//(l,r,b,t)
+  gPad->SetLogy();
+   
   hDLmass_sum_right_vertex->Add(hDLmass_delta,-1);
   hDLmass_sum_right_vertex->Add(hDLmass_sum_all_signals,-1);
-  hDLmass_sum_right_vertex->GetXaxis()->SetTitle("M_{e^{+} e^{-}} [MeV]");
+  hDLmass_sum_right_vertex->GetXaxis()->SetTitle("M^{inv}_{e^{+} e^{-}} #left[MeV c^{-2} #right]");
+  /*
+  gPad->SetLeftMargin(0.14);
+  gPad->SetTopMargin(0.05);
+  gPad->SetRightMargin(0.05);
+  gPad->SetBottomMargin(0.14);
+  */
+  //set graphical properties for first histogram on canvas
+  hDLmass_sum_right_vertex->SetTitle("Y #rightarrow #Lambda e^{+}e^{-}");
+  hDLmass_sum_right_vertex->GetXaxis()->SetRangeUser(0,500);
+  hDLmass_sum_right_vertex->GetYaxis()->SetRangeUser(1e-10,5e-5);
+  hDLmass_sum_right_vertex->GetXaxis()->SetLabelFont(42);
+  hDLmass_sum_right_vertex->GetXaxis()->SetNdivisions(505);
+  hDLmass_sum_right_vertex->GetXaxis()->SetLabelSize(0.04);
+  hDLmass_sum_right_vertex->GetXaxis()->SetTitleSize(0.05);
+  hDLmass_sum_right_vertex->GetXaxis()->SetTitleOffset(1.1);
+  hDLmass_sum_right_vertex->GetXaxis()->SetTitleFont(42);
+  hDLmass_sum_right_vertex->GetYaxis()->SetTitle("#frac{d#sigma}{dM_{e^{+}e^{-}}} #left[#frac{#mub}{MeV c^{-2}} #right]");
+  hDLmass_sum_right_vertex->GetYaxis()->SetLabelFont(42);
+  hDLmass_sum_right_vertex->GetYaxis()->SetLabelSize(0.04);
+  hDLmass_sum_right_vertex->GetYaxis()->SetTitleOffset(1.35);
+  hDLmass_sum_right_vertex->GetYaxis()->SetTitleSize(0.05);
+  hDLmass_sum_right_vertex->GetYaxis()->SetTitleFont(42);
+
   
   hDLmass_sum_right_vertex->Draw("same");
-  hDLmass_sum_right_vertex->SetLineColor(kMagenta);
+  
+  /*hDLmass_sum_right_vertex->SetLineColor(kMagenta);
   hDLmass_sum_right_vertex->SetLineStyle(1);
   hDLmass_sum_right_vertex->SetLineWidth(3);
-
-  hDLmass_background_renolmalize->Draw("same");
-  hDLmass_background_renolmalize->SetLineWidth(1);
-  hDLmass_background_renolmalize->SetLineColor(kRed);
+  */
+  hDLmass_background_renolmalize->Draw("psame");
+  if(includeD)
+    {
+    hDLmass_sum_all_signals->Add(hDLmass_delta,1);
+    hDLmass_sum_all_signals->Add(hDLmass_sum,1);
+    hDLmass_sum_all_signals->Add(hDLmass_sum_right_vertex,1);
+    renolmalize_this_histogram(hDLmass_sum_all_signals,2);
+    }
   hDLmass_sum_all_signals->Draw("same");
-  hDLmass_sum_all_signals->SetLineColor(kGreen);
-  hDLmass_sum_all_signals->SetLineWidth(3);
-  hDLmass_sum_all_signals->SetFillStyle(3144);
+
+  
+  //hDLmass_sum_all_signals->SetLineColor(kYellow-6);
+  //hDLmass_sum_all_signals->SetLineWidth(4);
+  //hDLmass_sum_all_signals->SetFillStyle(3144);
   //hDLmass_sum_background_re->Draw("same");
   //hDLmass_sum_background_re->SetLineColor(kBlue);
-  hDLmass_FF->Draw("same");
-  hDLmass_FF->SetLineStyle(2);
-  hDLmass_FF->SetLineColor(kGreen);
+  //hDLmass_FF->SetLineWidth(0);
+  //hDLmass_FF->Draw("same");
+  //hDLmass_FF->SetLineStyle(3);
+  //hDLmass_FF->SetLineColor(kGreen);
   hDLmass_delta->Draw("same");
-  hDLmass_delta->SetLineWidth(2);
-
+  //hDLmass_delta->SetLineWidth(3);
+  
+  hDLmassDistZL[signal_ch[1]]=renolmalize(hDLmassDistZL[signal_ch[1]],2); //rebin L1405
   //draw signal channels
   int jmax=sizeof(signal_ch)/sizeof(signal_ch[0]);
   for(int j=0;j<jmax;j++)
     {
       hDLmassDistZL[signal_ch[j]]->Draw("same");
+      hDLmassDistZL[signal_ch[j]]->SetLineWidth(3);
     }
-  //hDLmassDistZL[0]->Draw("same");
-  //hDLmassDistZL[10]->Draw("same");
-  //hDLmassDistZL[11]->Draw("same");
-  //hDLmassDistZL[1]->Draw("same");
-  //hDLmassDistZL[8]->Draw("same");
-  //hDLmassDistZL[9]->Draw("same");
+
+  format_delta(hDLmass_delta);
+  format_sumSignals(hDLmass_sum_all_signals);
+  format_pi0(hDLmass_sum_right_vertex);
+  format_l1520(hDLmassDistZL[signal_ch[0]]);
+  format_s1385(hDLmassDistZL[signal_ch[1]]);
+  format_l1405(hDLmassDistZL[signal_ch[2]]);
+  format_cb(hDLmass_background_renolmalize);
+
+  TLegend *leg1 = new TLegend(0.7,0.5,0.85,0.85,NULL,"brNDC");
+  leg1->SetBorderSize(0);
+  leg1->SetTextSize(0.027);
+  TLegendEntry *entry=leg1->AddEntry(hL1520mass_sum_all_signals,"all channeles","lpf");
+  entry->SetFillStyle(1001);
+  entry->SetTextFont(42);
+  entry=leg1->AddEntry(hL1520massDistZLpi0[1],"#Lambda(1520) #rightarrow #Lambda e^{+}e^{-}","lpf");
+  entry->SetTextFont(42);
+  entry=leg1->AddEntry(hL1520massDistZLpi0[8],"#Lambda(1405) #rightarrow #Lambda e^{+}e^{-}","lpf");
+  entry->SetFillStyle(1001);
+  entry->SetTextFont(42);
+  entry=leg1->AddEntry(hL1520massDistZLpi0[9],"#Sigma(1385) #rightarrow #Lambda e^{+}e^{-}","lpf");
+  entry->SetTextFont(42);
+  entry=leg1->AddEntry(hL1520_delta,"#Delta #rightarrow N e^{+} e^{-}","lpf");
+  entry->SetTextFont(42);
+  entry=leg1->AddEntry(sum_renormalize,"CB","lpf");
+  entry->SetTextFont(42);
+  entry=leg1->AddEntry( hDLmass_sum_right_vertex,"#pi^{0} Dalitz","lpf");
+  entry->SetTextFont(42);
+  leg1->Draw();
   
   
+  cFinalDL_cb->Update();
   //MyFile->Close();
   //if (!( MyFile->IsOpen()) )
   //printf("File closed successfully\n");

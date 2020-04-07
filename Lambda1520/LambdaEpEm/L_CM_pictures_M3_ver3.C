@@ -174,6 +174,7 @@ int L_CM_pictures_M3_ver3()
   const int fn=14;//number of files in "infile"
   const int signal_ch[]={1,8,9};//list of signal channels in "infile" file, starting from 0
   const int ur_background[]={10,11,12,13};//List of \Delta files
+  bool includeBG=0;//do I want to addd all channels together, or just signal
   bool includeD =1;//do I want include \Deltas to sum of signal channels
   std::ifstream infile("files_list_k.dat");//list of histograms
   std::string file;
@@ -524,7 +525,7 @@ int L_CM_pictures_M3_ver3()
   hL1520mass_background->Add(hL1520_delta,-1);
   hL1520mass_background->GetXaxis()->SetTitle("M_{#Lambda^{0} e^{+} e^{-}} [MeV c^{-2}]");
   
-  TH1F* sum_renormalize=renolmalize(hL1520mass_background,1);
+  TH1F* sum_renormalize=renolmalize(hL1520mass_background,2);
   TH1F* CM_background=renolmalize(hL1520mass_sum_CBbackground,1);
   sum_renormalize->Smooth();
 
@@ -534,8 +535,10 @@ int L_CM_pictures_M3_ver3()
   if(includeD)
     {
     hL1520mass_sum_all_signals->Add(hL1520_delta,1);
-    hL1520mass_sum_all_signals->Add(sum_renormalize,1);
+    //hL1520mass_sum_all_signals->Add(sum_renormalize,1);
     }
+  if(includeBG)
+    hL1520mass_sum_all_signals->Add(sum_renormalize,1);
   hL1520mass_sum_all_signals->GetXaxis()->SetTitle("M_{#Lambda^{0} e^{+} e^{-}} [MeV]");
   hL1520mass_sum_all_signals->Draw("same");
   //hL1520mass_sum_all_signals->SetLineWidth(2);
@@ -575,7 +578,7 @@ int L_CM_pictures_M3_ver3()
   TLegend *leg = new TLegend(0.7,0.5,0.85,0.85,NULL,"brNDC");
   leg->SetBorderSize(0);
   leg->SetTextSize(0.027);
-  TLegendEntry *entry=leg->AddEntry(hL1520mass_sum_all_signals,"all channels","lpf");
+  TLegendEntry *entry=leg->AddEntry(hL1520mass_sum_all_signals,"signal #rightarrow #Lambda e^{+}e^{-}","lpf");
   entry->SetFillStyle(1001);
   entry->SetTextFont(42);
   entry=leg->AddEntry(hL1520massDistZLpi0[1],"#Lambda(1520) #rightarrow #Lambda e^{+}e^{-}","lpf");
@@ -643,10 +646,18 @@ gPad->SetMargin(0.20, 0.05, 0.15, 0.1);//(l,r,b,t)
   if(includeD)
     {
     hDLmass_sum_all_signals->Add(hDLmass_delta,1);
-    hDLmass_sum_all_signals->Add(hDLmass_sum,1);
-    hDLmass_sum_all_signals->Add(hDLmass_sum_right_vertex,1);
-    renolmalize_this_histogram(hDLmass_sum_all_signals,2);
+    //hDLmass_sum_all_signals->Add(hDLmass_sum,1);
+    //hDLmass_sum_all_signals->Add(hDLmass_sum_right_vertex,1);
+    //renolmalize_this_histogram(hDLmass_sum_all_signals,2);
     }
+  if(includeBG)
+    {
+      //hDLmass_sum_all_signals->Add(hDLmass_delta,1);
+      hDLmass_sum_all_signals->Add(hDLmass_sum,1);
+      hDLmass_sum_all_signals->Add(hDLmass_sum_right_vertex,1);
+      renolmalize_this_histogram(hDLmass_sum_all_signals,2);
+    }
+  
   hDLmass_sum_all_signals->Draw("same");
 
   
@@ -682,7 +693,7 @@ gPad->SetMargin(0.20, 0.05, 0.15, 0.1);//(l,r,b,t)
   TLegend *leg1 = new TLegend(0.7,0.5,0.85,0.85,NULL,"brNDC");
   leg1->SetBorderSize(0);
   leg1->SetTextSize(0.027);
-  TLegendEntry *entry=leg1->AddEntry(hL1520mass_sum_all_signals,"all channeles","lpf");
+  TLegendEntry *entry=leg1->AddEntry(hL1520mass_sum_all_signals,"signal #rightarrow #Lambda e^{+}e^{-}","lpf");
   entry->SetFillStyle(1001);
   entry->SetTextFont(42);
   entry=leg1->AddEntry(hL1520massDistZLpi0[1],"#Lambda(1520) #rightarrow #Lambda e^{+}e^{-}","lpf");
