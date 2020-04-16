@@ -139,7 +139,7 @@ void format_pi0(TH1 *h)
   h->SetLineWidth(3);
   h->SetMarkerColor(kCyan-6);
   h->SetMarkerStyle(20);
-  h->SetMarkerSize(1.5);
+  h->SetMarkerSize(0.2);
 
 }
 

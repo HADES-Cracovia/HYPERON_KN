@@ -11,7 +11,7 @@ void clean(TH1F* hist)
   for (Int_t j=1; j<hist->GetNbinsX()+1; ++j)
     {
       double cont=hist->GetBinContent(j);
-      if(cont<1)
+      if(cont<0)
 	{
 	  hist->SetBinContent( j, 0);
 	  hist->SetBinError( j, 0);
@@ -176,6 +176,7 @@ int L_CM_pictures_M3_ver3()
   const int ur_background[]={10,11,12,13};//List of \Delta files
   bool includeBG=0;//do I want to addd all channels together, or just signal
   bool includeD =1;//do I want include \Deltas to sum of signal channels
+  bool includePi0=1;//Do I want add a Pi0 to sum of signals
   std::ifstream infile("files_list_k.dat");//list of histograms
   std::string file;
   //std::string directory="/lustre/nyx/hades/user/iciepal/Lambda1520_ic/";//directory comon for all files
@@ -523,7 +524,7 @@ int L_CM_pictures_M3_ver3()
   //cFinalL1520->SetCanvasSize(700,400);
   gPad->SetMargin(0.15, 0.05, 0.15, 0.09);//(l,r,b,t)
   hL1520mass_background->Add(hL1520_delta,-1);
-  hL1520mass_background->GetXaxis()->SetTitle("M_{#Lambda^{0} e^{+} e^{-}} [MeV c^{-2}]");
+  hL1520mass_background->GetXaxis()->SetTitle("M_{#Lambda^{0} e^{+} e^{-}} [MeV]");
   
   TH1F* sum_renormalize=renolmalize(hL1520mass_background,2);
   TH1F* CM_background=renolmalize(hL1520mass_sum_CBbackground,1);
@@ -539,21 +540,22 @@ int L_CM_pictures_M3_ver3()
     }
   if(includeBG)
     hL1520mass_sum_all_signals->Add(sum_renormalize,1);
+  
   hL1520mass_sum_all_signals->GetXaxis()->SetTitle("M_{#Lambda^{0} e^{+} e^{-}} [MeV]");
   hL1520mass_sum_all_signals->Draw("same");
   //hL1520mass_sum_all_signals->SetLineWidth(2);
   //hL1520mass_sum_all_signals->SetLineColor(kYellow-6);
   hL1520mass_sum_all_signals->SetTitle("Y #rightarrow #Lambda e^{+}e^{-}");
-   hL1520mass_sum_all_signals->GetXaxis()->SetRangeUser(1200,1800);
+  hL1520mass_sum_all_signals->GetXaxis()->SetRangeUser(1200,1800);
   hL1520mass_sum_all_signals->GetXaxis()->SetLabelFont(42);
   hL1520mass_sum_all_signals->GetXaxis()->SetNdivisions(505);
-  hL1520mass_sum_all_signals->GetXaxis()->SetLabelSize(0.04);
+  hL1520mass_sum_all_signals->GetXaxis()->SetLabelSize(0.05);
   hL1520mass_sum_all_signals->GetXaxis()->SetTitleSize(0.05);
   hL1520mass_sum_all_signals->GetXaxis()->SetTitleOffset(1.1);
   hL1520mass_sum_all_signals->GetXaxis()->SetTitleFont(42);
-  hL1520mass_sum_all_signals->GetYaxis()->SetTitle("#frac{d#sigma}{dM_{#Lambda^{0} e^{+}e^{-}}} #left[#frac{#mub}{MeV c^{-2}} #right]");
+  hL1520mass_sum_all_signals->GetYaxis()->SetTitle("#frac{d#sigma}{dM_{#Lambda^{0} e^{+}e^{-}}} #left[#frac{#mub}{MeV} #right]");
   hL1520mass_sum_all_signals->GetYaxis()->SetLabelFont(42);
-  hL1520mass_sum_all_signals->GetYaxis()->SetLabelSize(0.04);
+  hL1520mass_sum_all_signals->GetYaxis()->SetLabelSize(0.05);
   hL1520mass_sum_all_signals->GetYaxis()->SetTitleOffset(1.15);
   hL1520mass_sum_all_signals->GetYaxis()->SetTitleSize(0.05);
   hL1520mass_sum_all_signals->GetYaxis()->SetTitleFont(42);
@@ -578,8 +580,10 @@ int L_CM_pictures_M3_ver3()
   TLegend *leg = new TLegend(0.7,0.5,0.85,0.85,NULL,"brNDC");
   leg->SetBorderSize(0);
   leg->SetTextSize(0.027);
-  TLegendEntry *entry=leg->AddEntry(hL1520mass_sum_all_signals,"signal #rightarrow #Lambda e^{+}e^{-}","lpf");
+  TLegendEntry *entry=leg->AddEntry(sum_renormalize,"CB","lpf");
   entry->SetFillStyle(1001);
+  entry->SetTextFont(42);
+  entry=leg->AddEntry(hL1520mass_sum_all_signals,"signal #rightarrow #Lambda e^{+}e^{-}","lpf");
   entry->SetTextFont(42);
   entry=leg->AddEntry(hL1520massDistZLpi0[1],"#Lambda(1520) #rightarrow #Lambda e^{+}e^{-}","lpf");
   entry->SetTextFont(42);
@@ -590,15 +594,13 @@ int L_CM_pictures_M3_ver3()
   entry->SetTextFont(42);
   entry=leg->AddEntry(hL1520_delta,"#Delta #rightarrow N e^{+} e^{-}","lpf");
   entry->SetTextFont(42);
-  entry=leg->AddEntry(sum_renormalize,"CB","lpf");
-  entry->SetTextFont(42);
   leg->Draw();
   
   
   cFinalL1520->Update();
 
   //dI-LEPTON SPECTRUM
-  
+ 
   TCanvas* cFinalDL_cb=new TCanvas("cFinalDL_cb","cFinalDL_cb");
   TH1F* hDLmass_CB=(TH1F*)hDLmass_sum->Clone("CBbackground");
   hDLmass_CB->Add(hDLmass_sum_right_vertex,-1);
@@ -606,12 +608,32 @@ int L_CM_pictures_M3_ver3()
   TH1F* hDLmass_background_renolmalize=renolmalize(hDLmass_CB,2);
   TH1F* hDLmass_sum_background_re=renolmalize(hDLmass_sum_background,2);
   TH1F* hDLmass_sum_renolmalize=renolmalize(hDLmass_sum,2);
-gPad->SetMargin(0.20, 0.05, 0.15, 0.1);//(l,r,b,t)
+  gPad->SetMargin(0.20, 0.05, 0.15, 0.1);//(l,r,b,t)
   gPad->SetLogy();
-   
+
   hDLmass_sum_right_vertex->Add(hDLmass_delta,-1);
   hDLmass_sum_right_vertex->Add(hDLmass_sum_all_signals,-1);
-  hDLmass_sum_right_vertex->GetXaxis()->SetTitle("M^{inv}_{e^{+} e^{-}} #left[MeV c^{-2} #right]");
+  hDLmass_sum_right_vertex->GetXaxis()->SetTitle("M^{inv}_{e^{+} e^{-}} [MeV]");
+ 
+  if(includeD)
+    {
+      hDLmass_sum_all_signals->Add(hDLmass_delta,1);
+      //hDLmass_sum_all_signals->Add(hDLmass_sum,1);
+      //hDLmass_sum_all_signals->Add(hDLmass_sum_right_vertex,1);
+      //renolmalize_this_histogram(hDLmass_sum_all_signals,2);
+    }
+  if(includeBG)
+    {
+      //hDLmass_sum_all_signals->Add(hDLmass_delta,1);
+      hDLmass_sum_all_signals->Add(hDLmass_sum,1);
+      //hDLmass_sum_all_signals->Add(hDLmass_sum_right_vertex,1);
+      renolmalize_this_histogram(hDLmass_sum_all_signals,2);
+    }
+  if(includePi0)
+    {
+      clean(hDLmass_sum_right_vertex);
+      hDLmass_sum_all_signals->Add(hDLmass_sum_right_vertex,1);
+    }
   /*
   gPad->SetLeftMargin(0.14);
   gPad->SetTopMargin(0.05);
@@ -624,13 +646,13 @@ gPad->SetMargin(0.20, 0.05, 0.15, 0.1);//(l,r,b,t)
   hDLmass_sum_right_vertex->GetYaxis()->SetRangeUser(1e-10,5e-5);
   hDLmass_sum_right_vertex->GetXaxis()->SetLabelFont(42);
   hDLmass_sum_right_vertex->GetXaxis()->SetNdivisions(505);
-  hDLmass_sum_right_vertex->GetXaxis()->SetLabelSize(0.04);
+  hDLmass_sum_right_vertex->GetXaxis()->SetLabelSize(0.05);
   hDLmass_sum_right_vertex->GetXaxis()->SetTitleSize(0.05);
   hDLmass_sum_right_vertex->GetXaxis()->SetTitleOffset(1.1);
   hDLmass_sum_right_vertex->GetXaxis()->SetTitleFont(42);
-  hDLmass_sum_right_vertex->GetYaxis()->SetTitle("#frac{d#sigma}{dM_{e^{+}e^{-}}} #left[#frac{#mub}{MeV c^{-2}} #right]");
+  hDLmass_sum_right_vertex->GetYaxis()->SetTitle("#frac{d#sigma}{dM_{e^{+}e^{-}}} #left[#frac{#mub}{MeV} #right]");
   hDLmass_sum_right_vertex->GetYaxis()->SetLabelFont(42);
-  hDLmass_sum_right_vertex->GetYaxis()->SetLabelSize(0.04);
+  hDLmass_sum_right_vertex->GetYaxis()->SetLabelSize(0.05);
   hDLmass_sum_right_vertex->GetYaxis()->SetTitleOffset(1.35);
   hDLmass_sum_right_vertex->GetYaxis()->SetTitleSize(0.05);
   hDLmass_sum_right_vertex->GetYaxis()->SetTitleFont(42);
@@ -638,39 +660,10 @@ gPad->SetMargin(0.20, 0.05, 0.15, 0.1);//(l,r,b,t)
   
   hDLmass_sum_right_vertex->Draw("same");
   
-  /*hDLmass_sum_right_vertex->SetLineColor(kMagenta);
-  hDLmass_sum_right_vertex->SetLineStyle(1);
-  hDLmass_sum_right_vertex->SetLineWidth(3);
-  */
   hDLmass_background_renolmalize->Draw("psame");
-  if(includeD)
-    {
-    hDLmass_sum_all_signals->Add(hDLmass_delta,1);
-    //hDLmass_sum_all_signals->Add(hDLmass_sum,1);
-    //hDLmass_sum_all_signals->Add(hDLmass_sum_right_vertex,1);
-    //renolmalize_this_histogram(hDLmass_sum_all_signals,2);
-    }
-  if(includeBG)
-    {
-      //hDLmass_sum_all_signals->Add(hDLmass_delta,1);
-      hDLmass_sum_all_signals->Add(hDLmass_sum,1);
-      hDLmass_sum_all_signals->Add(hDLmass_sum_right_vertex,1);
-      renolmalize_this_histogram(hDLmass_sum_all_signals,2);
-    }
-  
-  hDLmass_sum_all_signals->Draw("same");
+    hDLmass_sum_all_signals->Draw("same");
 
-  
-  //hDLmass_sum_all_signals->SetLineColor(kYellow-6);
-  //hDLmass_sum_all_signals->SetLineWidth(4);
-  //hDLmass_sum_all_signals->SetFillStyle(3144);
-  //hDLmass_sum_background_re->Draw("same");
-  //hDLmass_sum_background_re->SetLineColor(kBlue);
-  //hDLmass_FF->SetLineWidth(0);
-  //hDLmass_FF->Draw("same");
-  //hDLmass_FF->SetLineStyle(3);
-  //hDLmass_FF->SetLineColor(kGreen);
-  hDLmass_delta->Draw("same");
+   hDLmass_delta->Draw("same");
   //hDLmass_delta->SetLineWidth(3);
   
   hDLmassDistZL[signal_ch[1]]=renolmalize(hDLmassDistZL[signal_ch[1]],2); //rebin L1405
@@ -693,8 +686,10 @@ gPad->SetMargin(0.20, 0.05, 0.15, 0.1);//(l,r,b,t)
   TLegend *leg1 = new TLegend(0.7,0.5,0.85,0.85,NULL,"brNDC");
   leg1->SetBorderSize(0);
   leg1->SetTextSize(0.027);
-  TLegendEntry *entry=leg1->AddEntry(hL1520mass_sum_all_signals,"signal #rightarrow #Lambda e^{+}e^{-}","lpf");
+  TLegendEntry *entry=leg1->AddEntry(sum_renormalize,"CB","lpf");
   entry->SetFillStyle(1001);
+  entry->SetTextFont(42);
+  entry=leg1->AddEntry(hL1520mass_sum_all_signals,"signal #rightarrow #Lambda e^{+}e^{-}","lpf");
   entry->SetTextFont(42);
   entry=leg1->AddEntry(hL1520massDistZLpi0[1],"#Lambda(1520) #rightarrow #Lambda e^{+}e^{-}","lpf");
   entry->SetTextFont(42);
@@ -704,8 +699,6 @@ gPad->SetMargin(0.20, 0.05, 0.15, 0.1);//(l,r,b,t)
   entry=leg1->AddEntry(hL1520massDistZLpi0[9],"#Sigma(1385) #rightarrow #Lambda e^{+}e^{-}","lpf");
   entry->SetTextFont(42);
   entry=leg1->AddEntry(hL1520_delta,"#Delta #rightarrow N e^{+} e^{-}","lpf");
-  entry->SetTextFont(42);
-  entry=leg1->AddEntry(sum_renormalize,"CB","lpf");
   entry->SetTextFont(42);
   entry=leg1->AddEntry( hDLmass_sum_right_vertex,"#pi^{0} Dalitz","lpf");
   entry->SetTextFont(42);
