@@ -298,6 +298,7 @@ int L_CM_pictures_M3_ver3()
 
       hinvM_pmHpHDistZ[n]= (TH1F*)hist_file->Get("hinvM_pmHpHDistZ")->Clone();
       hinvM_pmHpFTDistZ[n]=(TH1F*)hist_file->Get("hinvM_pmHpFTDistZ")->Clone();
+
       if(is_in(n,ur_background,4))//compensate wrong weight from pluto for certain channels
 	{
 	  //cout<<n<<" is o the list of channels with wrong weight"<<endl;
