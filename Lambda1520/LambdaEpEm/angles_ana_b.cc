@@ -303,7 +303,9 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   
   TH1F *h2L1520vertex = new TH1F("h2L1520vertex","h2L1520vertex",1000,-300,300);
   TH1F *h2LHvertex = new TH1F("h2LHvertex","h2LHvertex",1000,-1000,1000);
-
+  TH1F *hPrimaryVertex = new TH1F("hPrimaryVertex","hPrimaryVertex",1000,-300,100);
+  TH2F *h2PrimaryVertex = new TH2F("h2PrimaryVertex","h2PrimaryVertex",300,-100,0,300,0,100);
+  
   //**************************************************************************** 
    
   TH1F *hDLmassAll=new TH1F("hDLmassAll","hDLmassAll",1000,0,700);
@@ -404,7 +406,7 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   TH1F *hDLmassFTDistZL=new TH1F("hDLmassFTDistZL","hDLmassFTDistZL",1000,0,700);
   TH1F *hDLmassFTDistZL_Lambda=new TH1F("hDLmassFTDistZL_Lambda","hDLmassFTDistZL_Lambda",1000,0,700);
   TH1F *hDLmassFTDistZL_Sigma=new TH1F("hDLmassFTDistZL_Sigma","hDLmassFTDistZL_Sigma",1000,0,700);
-   TH1F *hL1520massFTDistZL=new TH1F("hL1520massFTDistZL","hL1520massFTDistZL",1000,1200,2200);
+  TH1F *hL1520massFTDistZL=new TH1F("hL1520massFTDistZL","hL1520massFTDistZL",1000,1200,2200);
   
   TH1F *hDLmassFTDistZLRL=new TH1F("hDLmassFTDistZLRL","hDLmassFTDistZLRL",1000,0,700);
   TH1F *hL1520massFTDistZLRL=new TH1F("hL1520massFTDistZLRL","hL1520massFTDistZLRL",1000,1200,2200);
@@ -638,12 +640,15 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   TCanvas* cEff=new TCanvas("cEff","detection_effi");
   TH1F* hEprotons4Pi=new TH1F("hEprotons4Pi","prot_kine;theta",180,0,180);
   TH1F* hEprotonsdet=new TH1F("hEprotonsdet","prot_registered;theta",180,0,180);
+  TH1F* hEprotonsdet_correct=new TH1F("hEprotonsdet_correct","prot_registered;theta",180,0,180);
   TH1F* hEprotonsEff=new TH1F("hEprotonsEff","prot_effi;theta",180,0,180);
   TH1F* hEpions4Pi=new TH1F("hEpions4Pi","pim_kine; theta",180,0,180);
   TH1F* hEpionsdet=new TH1F("hEpionsdet","pim_registered; theta",180,0,180);
+  TH1F* hEpionsdet_correct=new TH1F("hEpionsdet_correct","pim_registered; theta",180,0,180);
   TH1F* hEpionsEff=new TH1F("hEpionsEff","pim_effi; theta;efficiency",180,0,180);
   TH1F* hEleptons4Pi=new TH1F("hEleptons4Pi","leptons_kine; theta",180,0,180);
   TH1F* hEleptonsdet=new TH1F("hEleptonsdet","leptons_registered; theta",180,0,180);
+  TH1F* hEleptonsdet_correct=new TH1F("hEleptonsdet_correct","leptons_registered; theta",180,0,180);
   TH1F* hEleptonsEff=new TH1F("hEleptonsEff","lept_effi; theta;efficiency",180,0,180);
   TH2F* h2Eproton4Pi=new TH2F("h2Eproton4Pi","prot_4Pi; phi; theta",100,0,360,50,0,180);
   TH2F* h2Eprotondet=new TH2F("h2Eprotondet","prot_registered; phi; theta",100,0,360,50,0,180);
@@ -659,9 +664,9 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   TH1F* hEFLprotons4Pi=new TH1F("hEFLprotons4Pi","prot_kine; theta",180,0,180);
   TH1F* hEFLprotonsdet=new TH1F("hEFLprotonsdet","prot_registered; theta",180,0,180);
   TH1F* hEFLprotonsEff=new TH1F("hEFLprotonsEff","prot_effi; theta;efficiency",180,0,180);
-  TH1F* hEFLpions4Pi=new TH1F("hEFLprotons4Pi","prot_kine; theta",180,0,180);
-  TH1F* hEFLpionsdet=new TH1F("hEFLprotonsdet","prot_registered; theta",180,0,180);
-  TH1F* hEFLpionsEff=new TH1F("hEFLprotonsEff","prot_effi; theta;efficiency",180,0,180);
+  TH1F* hEFLpions4Pi=new TH1F("hEFLpions4Pi","prot_kine; theta",180,0,180);
+  TH1F* hEFLpionsdet=new TH1F("hEFLpionsdet","prot_registered; theta",180,0,180);
+  TH1F* hEFLpionsEff=new TH1F("hEFLpionsEff","prot_effi; theta;efficiency",180,0,180);
      
   TH2F *proton_identyf_real=new TH2F("proton_identyf_real","proton_identyf_real;p[MeV];#beta",1000,0,3000,1000,0,1.2);
   TH2F *proton_identyf_ideal=new TH2F("proton_identyf_ideal","proton_identyf_ideal;p[MeV];#beta",1000,0,3000,1000,0,1.2);
@@ -815,6 +820,9 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 
 	  float nerbyFit=0;
 	  float nerbyUnFit=0;
+
+	  float NFcut=0;
+	  float NUFcut=0;
 	  
 	  //nerbyFit=fabs(partH->getAngleToNearbyFittedInner())*TMath::RadToDeg(); 
 	  //nerbyUnFit=fabs(partH->getAngleToNearbyUnfittedInner())*TMath::RadToDeg(); 
@@ -826,7 +834,7 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 	  sector[sec]=1;
 	  
 	  //cout<<"---> "<<nerbyFit<<" "<<nerbyUnFit<<endl;
-	  if(partH->getRichMatchingQuality()!=-1 && partH->isFlagBit(kIsUsed) && nerbyFit>4.  && nerbyUnFit>4. )
+	  if(partH->getRichMatchingQuality()!=-1 && partH->isFlagBit(kIsUsed) && nerbyFit>NFcut  && nerbyUnFit>NUFcut )
 	    {
 	      //if(partH->getRichMatchingQuality()!=-1 && partH->isFlagBit(kIsUsed)){
 	      //if(partH->getRichMatchingQuality()!=-1 && partH->isFlagBit(kIsUsed) && nerbyFit>2.  && nerbyUnFit>2. ){
@@ -843,8 +851,8 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 		  h2Eleptondet->Fill(partH->getPhi(),partH->getTheta());
 		  //flagdil=1;
 		  //h2IIleptonsInAcceptance->Fill(partH->getMomentum(),partH->getTheta());
-		  //cout<<"e+ "<<evnb<<" "<<partH->getGeantParentPID()<<" "<<partH->getGeantParentTrackNum()<<" "<<partH->getGeantGrandParentPID()<<endl;
-		  //dobre pary: 0,-1
+		  if(partH->getGeantPID()==2)
+		    hEleptonsdet_correct->Fill(partH->getTheta());
 		}
 	   		  
 	      if(//partH->getGeantPID()==3
@@ -857,7 +865,9 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 		  hEleptonsdet->Fill(partH->getTheta());
 		  //if(flagdil)
 		  h2Eleptondet->Fill(partH->getPhi(),partH->getTheta());
-		  //cout<<"e- "<<evnb<<" "<<partH->getGeantParentPID()<<" "<<partH->getGeantParentTrackNum()<<" "<<partH->getGeantGrandParentPID()<<endl;
+		  
+		  if(partH->getGeantPID()==3)
+		    hEleptonsdet_correct->Fill(partH->getTheta());
 		}
 	    }
 	  
@@ -871,8 +881,11 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 	      hEpionsdet->Fill(partH->getTheta());
 	      h2Epiondet->Fill(partH->getPhi(),partH->getTheta());
 
-	      if(partH->getGeantParentPID()==18) hEFLpionsdet->Fill(partH->getTheta());
-	   	      
+	      if(partH->getGeantParentPID()==18)
+		hEFLpionsdet->Fill(partH->getTheta());
+
+	      if(partH->getGeantPID()==9)
+		hEpionsdet_correct->Fill(partH->getTheta());
 	    }
 
 	  if(//partH->getGeantPID()==14 && partH->isFlagBit(kIsUsed)
@@ -887,7 +900,11 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 	      hEprotonsdet->Fill(partH->getTheta());
 	      h2Eprotondet->Fill(partH->getPhi(),partH->getTheta());
     
-	      if(partH->getGeantParentPID()==18) hEFLpionsdet->Fill(partH->getTheta());
+	      if(partH->getGeantParentPID()==18)
+		hEFLpionsdet->Fill(partH->getTheta());
+	      if(partH->getGeantPID()==14)
+		hEprotonsdet_correct->Fill(partH->getTheta());
+	   
 	    }
 	}		 
       }
@@ -910,21 +927,25 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 	  pFT.push_back(partFT);  
 	  //cout<<" "<<partFT->getTheta()<<endl;
 
-	  if(partFT->getGeantPID()==14){
+	  if(partFT->getGeantPID()==14)
+	    {
 	   
-	    hEprotonsdet->Fill(partFT->getTheta());
-	    h2Eprotondet->Fill(partFT->getPhi(),partFT->getTheta());
+	      hEprotonsdet->Fill(partFT->getTheta());
+	      h2Eprotondet->Fill(partFT->getPhi(),partFT->getTheta());
     
-	    if(partFT->getGeantParentPID()==18) hEFLpionsdet->Fill(partFT->getTheta());
-	  }
+	      if(partFT->getGeantParentPID()==18)
+		hEFLprotonsdet->Fill(partFT->getTheta());
+	    }
 
-	  if(partFT->getGeantPID()==9){
+	  if(partFT->getGeantPID()==9)
+	    {
 		
-	    hEpionsdet->Fill(partFT->getTheta());
-	    h2Epiondet->Fill(partFT->getPhi(),partFT->getTheta());
+	      //hEpionsdet->Fill(partFT->getTheta());
+	      //h2Epiondet->Fill(partFT->getPhi(),partFT->getTheta());
 		
-	    if(partFT->getGeantParentPID()==18) hEFLpionsdet->Fill(partFT->getTheta());
-	  }
+	      //if(partFT->getGeantParentPID()==18)
+	      //hEFLpionsdet->Fill(partFT->getTheta());
+	    }
 	      
 	  //}
 	    
@@ -2073,8 +2094,8 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 	  if(kineID==14 && kineparentID==18)//proton from lambda
 	    {
 	      //h2IIprotons->Fill(kine->getTotalMomentum(),kine->getThetaDeg());
-	      //hEprotons4Pi->Fill(kine->getThetaDeg());
-	      //h2Eproton4Pi->Fill(kine->getPhiDeg(),kine->getThetaDeg());
+	      hEprotons4Pi->Fill(kine->getThetaDeg());
+	      h2Eproton4Pi->Fill(kine->getPhiDeg(),kine->getThetaDeg());
 	      hEFLprotons4Pi->Fill(kine->getThetaDeg());
 	    }
 	  if(kineID==14 && mech==0)
@@ -2093,11 +2114,19 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 	      //hEIZpionSim->Fill(lambdaVertex.getZ());
 	    }
 
-	  if(kineID==9 && mech==0){//pim from primary vertex
+	  if(kineID==9){//pim 
 	    //if(kineID==9){
+	    double vx,vy,vz;
 	    hEpions4Pi->Fill(kine->getThetaDeg());
 	    h2Epion4Pi->Fill(kine->getPhiDeg(),kine->getThetaDeg());
 	  }
+
+	  if(mech==0){//from primary vertex
+	    Float_t vx,vy,vz;
+	    kine->getVertex(vx,vy,vz);
+	    hPrimaryVertex->Fill(vz);
+	    h2PrimaryVertex->Fill(vz,TMath::Sqrt(vx*vx+vy*vy));
+	  }   
 	    
 	    
 	  //if(kineID==14 && kine->getThetaDeg()<6.5)h2FDsimProtons->Fill(kine->getTotalMomentum(),kine->getThetaDeg());
@@ -2112,6 +2141,9 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
     }
 
   //***************************
+  hPrimaryVertex->Write();
+  h2PrimaryVertex->Write();
+  
   hinvM_pmHpHAll->Write();
   hinvM_pmHpFTAll->Write();
     
@@ -2407,97 +2439,132 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   lepton_identyf_real_dtheta->Write();
 
   hSectorMult_DistZLpi0->Write();
-  /*
-    TCanvas* c_identyf=new TCanvas("c_identyf","c_identyf");
-    c_identyf->Divide(2,3);
-    c_identyf->cd(1);
-    proton_identyf_ideal->Draw();
-    c_identyf->cd(2);
-    proton_identyf_real->Draw();
-    c_identyf->cd(3);
-    pion_identyf_ideal->Draw();
-    c_identyf->cd(4);
-    pion_identyf_real->Draw();
-    c_identyf->cd(5);
-    lepton_identyf_real->Draw();
-    c_identyf->cd(6);
-    lepton_identyf_ideal->Draw();
+  
+  TCanvas* c_identyf=new TCanvas("c_identyf","c_identyf");
+  c_identyf->Divide(2,3);
+  c_identyf->cd(1);
+  proton_identyf_ideal->Draw();
+  c_identyf->cd(2);
+  proton_identyf_real->Draw();
+  c_identyf->cd(3);
+  pion_identyf_ideal->Draw();
+  c_identyf->cd(4);
+  pion_identyf_real->Draw();
+  c_identyf->cd(5);
+  lepton_identyf_real->Draw();
+  c_identyf->cd(6);
+  lepton_identyf_ideal->Draw();
 
-    c_identyf->Write();
-    //********************************
-    /*
-    cEff->Divide(4,3);
-    cEff->cd(1);
-    hEprotons4Pi->Draw();
-    hEprotonsdet->SetLineColor(kRed);
-    hEprotonsdet->Draw("SAME");
-    //cEff->cd(2);
-    //hEprotonsdet->Draw();
-    cEff->cd(2);
-    hEprotonsEff->Divide(hEprotonsdet,hEprotons4Pi);
-    hEprotonsEff->Draw();
-    //cEff->cd(4);
-    //h2EprotonEff->Divide(h2Eprotondet,h2Eproton4Pi);
-    //h2EprotonEff->Draw("COLZ");
-    cEff->cd(3);
-    //h2EprotonEff->Divide(h2Eprotondet,h2Eproton4Pi);
-    h2Eprotondet->Draw("COLZ");
-    cEff->cd(4);
-    //h2EprotonEff->Divide(h2Eprotondet,h2Eproton4Pi);
-    h2Eproton4Pi->Draw("COLZ");
+  c_identyf->Write();
+  //********************************
+    
+  cEff->Divide(4,3);
+  cEff->cd(1);
+  hEprotons4Pi->Draw();
+  hEprotonsdet->SetLineColor(kRed);
+  hEprotonsdet->Draw("SAME");
+  hEprotonsdet_correct->Draw("same");
+  hEprotonsdet_correct->SetLineColor(kGreen);
+  //cEff->cd(2);
+  //hEprotonsdet->Draw();
+  cEff->cd(2);
+  hEprotonsEff->Divide(hEprotonsdet,hEprotons4Pi);
+  hEprotonsEff->Draw();
+  //cEff->cd(4);
+  //h2EprotonEff->Divide(h2Eprotondet,h2Eproton4Pi);
+  //h2EprotonEff->Draw("COLZ");
+  cEff->cd(3);
+  //h2EprotonEff->Divide(h2Eprotondet,h2Eproton4Pi);
+  h2Eprotondet->Draw("COLZ");
+  cEff->cd(4);
+  //h2EprotonEff->Divide(h2Eprotondet,h2Eproton4Pi);
+  h2Eproton4Pi->Draw("COLZ");
 
 
-    cEff->cd(5);
-    hEpions4Pi->Draw();
-    hEpionsdet->SetLineColor(kRed);
-    hEpionsdet->Draw("SAME");
-    cEff->cd(6);
-    //hEpionsdet->Draw();
-    hEpionsEff->Divide(hEpionsdet,hEpions4Pi);
-    hEpionsEff->Draw();
-    cEff->cd(7);
-    h2Epiondet->Draw("colz");
-    cEff->cd(8);
-    h2Epion4Pi->Draw("colz");
-    //h2EpionEff->Divide(h2Epiondet,h2Epion4Pi);
-    //h2EpionEff->Draw("COLZ");
+  cEff->cd(5);
+  hEpions4Pi->Draw();
+  hEpionsdet->SetLineColor(kRed);
+  hEpionsdet->Draw("SAME");
+  hEpionsdet_correct->Draw("same");
+  hEpionsdet_correct->SetLineColor(kGreen);
+  cEff->cd(6);
+  //hEpionsdet->Draw();
+  hEpionsEff->Divide(hEpionsdet,hEpions4Pi);
+  hEpionsEff->Draw();
+  cEff->cd(7);
+  h2Epiondet->Draw("colz");
+  cEff->cd(8);
+  h2Epion4Pi->Draw("colz");
+  //h2EpionEff->Divide(h2Epiondet,h2Epion4Pi);
+  //h2EpionEff->Draw("COLZ");
 
-    cEff->cd(9);
-    hEleptons4Pi->Draw();
-    hEleptonsdet->SetLineColor(kRed);
-    hEleptonsdet->Draw("SAME");
-    cEff->cd(10);
-    hEleptonsEff->Divide(hEleptonsdet,hEleptons4Pi);
-    hEleptonsEff->Draw();
-    cEff->cd(11);
-    h2Eleptondet->Draw("colz");
-    cEff->cd(12);
-    h2Elepton4Pi->Draw("colz");
+  cEff->cd(9);
+  hEleptons4Pi->Draw();
+  hEleptonsdet->SetLineColor(kRed);
+  hEleptonsdet->Draw("SAME");
+  hEleptonsdet_correct->Draw("same");
+  hEleptonsdet_correct->SetLineColor(kGreen);
+  cEff->cd(10);
+  hEleptonsEff->Divide(hEleptonsdet,hEleptons4Pi);
+  hEleptonsEff->Draw();
+  cEff->cd(11);
+  h2Eleptondet->Draw("colz");
+  cEff->cd(12);
+  h2Elepton4Pi->Draw("colz");
 
-    cEff->Write();
-  */
+  cEff->Write();
+  
   //*****************************
-  /*
-    cEffFromLambda->Divide(3,2);
-    cEffFromLambda->cd(1);
-    hEFLprotons4Pi->Draw();
-    cEffFromLambda->cd(2);
-    hEFLprotonsdet->Draw();
-    cEffFromLambda->cd(3);
-    hEFLprotonsEff->Divide(hEFLprotonsdet,hEFLprotons4Pi);
-    hEFLprotonsEff->Draw();
+  
+  cEffFromLambda->Divide(3,2);
+  cEffFromLambda->cd(1);
+  hEFLprotons4Pi->Draw();
+  cEffFromLambda->cd(2);
+  hEFLprotonsdet->Draw();
+  cEffFromLambda->cd(3);
+  hEFLprotonsEff->Divide(hEFLprotonsdet,hEFLprotons4Pi);
+  hEFLprotonsEff->Draw();
 
-    cEffFromLambda->cd(4);
-    hEFLpions4Pi->Draw();
-    cEffFromLambda->cd(5);
-    hEFLpionsdet->Draw();
-    cEffFromLambda->cd(6);
-    hEFLpionsEff->Divide(hEFLpionsdet,hEFLpions4Pi);
-    hEFLpionsEff->Draw();
+  cEffFromLambda->cd(4);
+  hEFLpions4Pi->Draw();
+  cEffFromLambda->cd(5);
+  hEFLpionsdet->Draw();
+  cEffFromLambda->cd(6);
+  hEFLpionsEff->Divide(hEFLpionsdet,hEFLpions4Pi);
+  hEFLpionsEff->Draw();
 
-    cEffFromLambda->Write();
-  */
+  cEffFromLambda->Write();
+  
 
+
+
+  hEprotons4Pi->Write();
+  hEprotonsdet->Write();
+  hEprotonsdet_correct->Write();
+  hEprotonsEff->Write();
+
+  hEpions4Pi->Write();
+  hEpionsdet->Write();
+  hEpionsdet_correct->Write();
+  hEpionsEff->Write();
+
+  hEleptons4Pi->Write();
+  hEleptonsdet->Write();
+  hEleptonsdet_correct->Write();
+  hEleptonsEff->Write();
+    
+  cEffFromLambda->Write();
+  hEFLprotons4Pi->Write();
+  hEFLprotonsdet->Write();
+  hEFLprotonsEff->Write();
+
+  cEffFromLambda->Write();
+  hEFLpions4Pi->Write();
+  hEFLpionsdet->Write();
+  hEFLpionsEff->Write();
+
+
+    
   //hinvMepemHH->Write();
   //hinvMepemFT->Write();
       

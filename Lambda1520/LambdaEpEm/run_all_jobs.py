@@ -1,5 +1,6 @@
 directory="/lustre/nyx/hades/user/iciepal/Lambda1520_ic/" #oryginal data directory
-fname="list_allfiles_newGeometryM3" #file with list of expected files
+#fname="list_allfiles_newGeometryM3" #file with list of expected files
+fname="list_ch48495052"
 import subprocess
 print("run job for all channels\n")
 import time

@@ -231,6 +231,8 @@ int L_CM_pictures_M3_ver3()
 
   TH1F *hinvM_pmHpHDistZ_sum;
   TH1F *hinvM_pmHpFTDistZ_sum;
+  TH1F *hinvM_pmpDistZ_sum;
+
   TH1F *hL1520mass_background;
   TH1F *hL1520mass_background_L;
   TH1F *hDLmass_sum;
@@ -420,6 +422,10 @@ int L_CM_pictures_M3_ver3()
   sumSignals(hDLmass_sum_all_signals,hDLmassDistZL,fn,signal_ch);
   sumSignals(hDLmass_delta,hDLmassDistZL,fn,ur_background);
   sumSignals(hL1520_delta,hL1520massDistZLpi0,fn,ur_background);
+
+
+  hinvM_pmpDistZ_sum=(TH1F*)hinvM_pmHpHDistZ_sum->Clone("hinvM_pmpDistZ_sum");
+  hinvM_pmpDistZ_sum->Add(hinvM_pmHpFTDistZ_sum);
   
   cout<<"all histograms set"<<endl;
   
@@ -739,7 +745,10 @@ int L_CM_pictures_M3_ver3()
   TCanvas* cLambda=new TCanvas("cLambda","cLambda");
   cLambda->Divide(1);
   cLambda->cd(1);
-  hinvM_pmHpHDistZ_sum->Draw();
+  hinvM_pmpDistZ_sum->Draw();
+  hinvM_pmpDistZ_sum->SetLineWidth(3);
+  hinvM_pmpDistZ_sum->SetLineColor(kGreen-2);
+  hinvM_pmHpHDistZ_sum->Draw("same");
   hinvM_pmHpHDistZ_sum->SetLineWidth(3);
   hinvM_pmHpHDistZ_sum->SetLineColor(kRed);
   hinvM_pmHpFTDistZ_sum->Draw("same");
