@@ -1,6 +1,6 @@
 directory="/lustre/nyx/hades/user/iciepal/Lambda1520_ic/" #oryginal data directory
 #fname="list_allfiles_newGeometryM3" #file with list of expected files
-fname="list_ch48495052"
+fname="list_newRICH_all"
 import subprocess
 print("run job for all channels\n")
 import time
@@ -26,7 +26,7 @@ for k in content:   #take every name from vector content
         print('waiting to finish list: {}'.format(k))
         print('still {} jobs to the end'.format(subprocess.check_output('squeue -u knowakow | wc -l',shell=True,)))
         time.sleep(30)
-    bashCommand = "./run_job.py "+k+" -d output_newGeometryM3_ver3_pi0"
+    bashCommand = "./run_job.py "+k+" -d output_newGeometryM3_ver3_pi0_RICH_check"
     print(bashCommand)
     os.system(bashCommand)
 

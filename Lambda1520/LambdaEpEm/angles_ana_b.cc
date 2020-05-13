@@ -792,7 +792,7 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 			  
       base_Tg.setX(0);
       base_Tg.setY(0);
-      base_Tg.setZ(-25.);
+     base_Tg.setZ(-25.);
       dir_Tg.setX(0);
       dir_Tg.setY(0);
       dir_Tg.setZ(1);
@@ -2475,7 +2475,7 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   c_identyf->cd(6);
   lepton_identyf_ideal->Draw();
 
-  c_identyf->Write();
+  //c_identyf->Write();
   //********************************
     
   cEff->Divide(4,3);
@@ -2532,7 +2532,7 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   cEff->cd(12);
   h2Elepton4Pi->Draw("colz");
 
-  cEff->Write();
+  //cEff->Write();
   
   //*****************************
   
@@ -2553,7 +2553,7 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   hEFLpionsEff->Divide(hEFLpionsdet,hEFLpions4Pi);
   hEFLpionsEff->Draw();
 
-  cEffFromLambda->Write();
+  //cEffFromLambda->Write();
   
 
 
@@ -2573,12 +2573,12 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   hEleptonsdet_correct->Write();
   hEleptonsEff->Write();
     
-  cEffFromLambda->Write();
+  //cEffFromLambda->Write();
   hEFLprotons4Pi->Write();
   hEFLprotonsdet->Write();
   hEFLprotonsEff->Write();
 
-  cEffFromLambda->Write();
+  //cEffFromLambda->Write();
   hEFLpions4Pi->Write();
   hEFLpionsdet->Write();
   hEFLpionsEff->Write();

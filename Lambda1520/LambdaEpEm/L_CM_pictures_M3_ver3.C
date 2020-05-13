@@ -180,7 +180,8 @@ int L_CM_pictures_M3_ver3()
   std::ifstream infile("files_list_k.dat");//list of histograms
   std::string file;
   //std::string directory="/lustre/nyx/hades/user/iciepal/Lambda1520_ic/";//directory comon for all files
-  std::string directory="./results_newGeometryM3_ver3_pi0/";//directory comon for all files
+  //std::string directory="./results_newGeometryM3_ver3_pi0/";//directory comon for all files
+  std::string directory="./results_lambda_epem/";
   int n=0;
   //write everything to file
   //TFile *MyFile = new TFile("output.root","recreate");
@@ -206,9 +207,9 @@ int L_CM_pictures_M3_ver3()
     64.*dp_dalitz/scale_factor,//channel 57 weight 8.065167e-10 set in PLUTO
     41.5*dp_dalitz/scale_factor//channel 58 weight 8.065167e-10 set in PLUTO
   };//ub
-
-  TH1F *hinvM_pmHpHDistZ[fn];
-  TH1F *hinvM_pmHpFTDistZ[fn];
+  
+  TH1F *hinvM_pmHpHDistZ_epem[fn];
+  TH1F *hinvM_pmHpFTDistZ_epem[fn];
   TH1F *hL1520massDistZLpi0[fn];
   TH1F *hL1520massFTDistZLpi0[fn];
   TH1F *hL1520massFinalRLpi0[fn];
@@ -229,9 +230,9 @@ int L_CM_pictures_M3_ver3()
   TH1F *hDLmassDistZL_epep[fn];
 
 
-  TH1F *hinvM_pmHpHDistZ_sum;
-  TH1F *hinvM_pmHpFTDistZ_sum;
-  TH1F *hinvM_pmpDistZ_sum;
+  TH1F *hinvM_pmHpHDistZ_sum_epem;
+  TH1F *hinvM_pmHpFTDistZ_sum_epem;
+  TH1F *hinvM_pmpDistZ_sum_epem;
 
   TH1F *hL1520mass_background;
   TH1F *hL1520mass_background_L;
@@ -296,8 +297,8 @@ int L_CM_pictures_M3_ver3()
       hDLmassDistZL_epep[n]= (TH1F*)hist_file->Get("hDLmassDistZL_epep")->Clone();
       hDLmassDistZL_emem[n]= (TH1F*)hist_file->Get("hDLmassDistZL_emem")->Clone();
 
-      hinvM_pmHpHDistZ[n]= (TH1F*)hist_file->Get("hinvM_pmHpHDistZ")->Clone();
-      hinvM_pmHpFTDistZ[n]=(TH1F*)hist_file->Get("hinvM_pmHpFTDistZ")->Clone();
+      hinvM_pmHpHDistZ_epem[n]= (TH1F*)hist_file->Get("hinvM_pmHpHDistZ_epem")->Clone();
+      hinvM_pmHpFTDistZ_epem[n]=(TH1F*)hist_file->Get("hinvM_pmHpFTDistZ_epem")->Clone();
 
       if(is_in(n,ur_background,4))//compensate wrong weight from pluto for certain channels
 	{
@@ -322,8 +323,8 @@ int L_CM_pictures_M3_ver3()
 
 	  hDLmassDistZL_epep[n]->Scale(1/8.065167e-10);
 	  hDLmassDistZL_emem[n]->Scale(1/8.065167e-10);
-	  hinvM_pmHpHDistZ[n]->Scale(1/8.065167e-10);
-	  hinvM_pmHpFTDistZ[n]->Scale(1/8.065167e-10);
+	  hinvM_pmHpHDistZ_epem[n]->Scale(1/8.065167e-10);
+	  hinvM_pmHpFTDistZ_epem[n]->Scale(1/8.065167e-10);
 	}      
       //call Sumw2 for all histograms  
       /*
@@ -376,8 +377,8 @@ int L_CM_pictures_M3_ver3()
       sethist(hDLmassDistZL_emem[k],k,bins,1,fscale[k]);
       sethist(hDLmassDistZL_epep[k],k,bins,1,fscale[k]);
 
-      sethist(hinvM_pmHpHDistZ[k],k,1,1,fscale[k]);
-      sethist(hinvM_pmHpFTDistZ[k],k,1,1,fscale[k]);
+      sethist(hinvM_pmHpHDistZ_epem[k],k,1,1,fscale[k]);
+      sethist(hinvM_pmHpFTDistZ_epem[k],k,1,1,fscale[k]);
       
       //sum FW with HADES
       
@@ -407,8 +408,8 @@ int L_CM_pictures_M3_ver3()
   sumAll(hDLmass_background_epep, hDLmassDistZL_epep,fn,signal_ch);
   sumAll(hDLmass_sum,hDLmassDistZL,fn,signal_ch);
   sumAll(hDLmass_sum_right_vertex,hDLmassDistZL_L,fn,signal_ch);
-  sumAll(hinvM_pmHpHDistZ_sum,hinvM_pmHpHDistZ,fn,signal_ch);
-  sumAll(hinvM_pmHpFTDistZ_sum,hinvM_pmHpFTDistZ,fn,signal_ch);
+  sumAll(hinvM_pmHpHDistZ_sum_epem,hinvM_pmHpHDistZ_epem,fn,signal_ch);
+  sumAll(hinvM_pmHpFTDistZ_sum_epem,hinvM_pmHpFTDistZ_epem,fn,signal_ch);
   
   //hL1520mass_real_backgroud=(TH1F*)hL1520mass_background->Clone("hL1520mass_real_backgroud");
   //hL1520mass_real_backgroud->Reset();
@@ -425,8 +426,8 @@ int L_CM_pictures_M3_ver3()
   sumSignals(hL1520_delta,hL1520massDistZLpi0,fn,ur_background);
 
 
-  hinvM_pmpDistZ_sum=(TH1F*)hinvM_pmHpHDistZ_sum->Clone("hinvM_pmpDistZ_sum");
-  hinvM_pmpDistZ_sum->Add(hinvM_pmHpFTDistZ_sum);
+  hinvM_pmpDistZ_sum_epem=(TH1F*)hinvM_pmHpHDistZ_sum_epem->Clone("hinvM_pmpDistZ_sum_epem");
+  hinvM_pmpDistZ_sum_epem->Add(hinvM_pmHpFTDistZ_sum_epem);
   
   cout<<"all histograms set"<<endl;
   
@@ -746,14 +747,14 @@ int L_CM_pictures_M3_ver3()
   TCanvas* cLambda=new TCanvas("cLambda","cLambda");
   cLambda->Divide(1);
   cLambda->cd(1);
-  hinvM_pmpDistZ_sum->Draw();
-  hinvM_pmpDistZ_sum->SetLineWidth(3);
-  hinvM_pmpDistZ_sum->SetLineColor(kGreen-2);
-  hinvM_pmHpHDistZ_sum->Draw("same");
-  hinvM_pmHpHDistZ_sum->SetLineWidth(3);
-  hinvM_pmHpHDistZ_sum->SetLineColor(kRed);
-  hinvM_pmHpFTDistZ_sum->Draw("same");
-  hinvM_pmHpFTDistZ_sum->SetLineWidth(3);
+  hinvM_pmpDistZ_sum_epem->Draw();
+  hinvM_pmpDistZ_sum_epem->SetLineWidth(3);
+  hinvM_pmpDistZ_sum_epem->SetLineColor(kGreen-2);
+  hinvM_pmHpHDistZ_sum_epem->Draw("same");
+  hinvM_pmHpHDistZ_sum_epem->SetLineWidth(3);
+  hinvM_pmHpHDistZ_sum_epem->SetLineColor(kRed);
+  hinvM_pmHpFTDistZ_sum_epem->Draw("same");
+  hinvM_pmHpFTDistZ_sum_epem->SetLineWidth(3);
     
   //end of printing results***************************************************************************
     

@@ -18,9 +18,22 @@
 
 using namespace std;
 
-
 HGeomVector calcPrimVertex_Track_Mother(const std::vector<HParticleCand *>cands, const HGeomVector & DecayVertex, const HGeomVector & dirMother, int trackA_num, int trackB_num);
 HGeomVector calcPrimVertex_Track_Mother(const std::vector<HParticleCand *>cands, const HGeomVector & beamVector, const HGeomVector & DecayVertex, const HGeomVector & dirMother, int trackA_num, int trackB_num);
+
+Int_t getMotherIndex(HGeantKine* particle)
+{
+  Int_t trackID=particle->getTrack();
+  HGeantKine* particleParent=particle->getParent(trackID);
+  Int_t parentID=0;
+  if(particleParent!=0)
+    parentID=particleParent->getID();
+  return parentID;
+      
+  //return particle->getGeneratorInfo1();
+}
+
+
 
 Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 {
@@ -86,17 +99,43 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   cout << "NEW ROOT TREE " << endl;
   //
   //crete histograms
+  const int nbin=100;
+  const int maxE=1000;
   TH1F* hk_particleid=new TH1F("hk_particleid","ParticleID",100,0,50);
   TH1F* hk_particleid_primary=new TH1F("hk_particleid_primary","ParticleID for particles from primary vertex",100,0,50);
-  TH1F* hk_minv_epem_all_pv=new TH1F("hk_minv_epem_all_pv","M^{inv}_{e^{+} e^{-}} for all leptons from primary reaction",1000,0,1000);
-  TH1F* hk_minv_epem_all_pv_acc=new TH1F("hk_minv_epem_all_pv_acc","M^{inv}_{e^{+} e^{-}} for leptons from primary reaction in acceptance",1000,0,1000);
+  TH1F* hk_particleid_L1116=new TH1F("hk_particleid_L1116","ParticleID for particles from L1116",100,0,50);
+  TH1F* hk_minv_epem_all_pv=new TH1F("hk_minv_epem_all_pv","M^{inv}_{e^{+} e^{-}} for all leptons from primary reaction",nbin,0,maxE);
+  TH1F* hk_minv_epem_all_pv_acc=new TH1F("hk_minv_epem_all_pv_acc","M^{inv}_{e^{+} e^{-}} for leptons from primary reaction in acceptance",nbin,0,maxE);
   
-TH1F* hpk_particleid=new TH1F("hpk_particleid","ParticleID for hParticleCand",100,0,50);
+  TH1F* hpk_particleid=new TH1F("hpk_particleid","ParticleID for hParticleCand",100,0,50);
+  TH1F* hpk_mult=new TH1F("hpk_mult","Multiplicity of tracks in HADES, only creationmechanizm==0",30,0,10);
   TH1F* hpk_particleid_primary=new TH1F("hpk_particleid_primary","ParticleID for particles from primary vertex for hParticleCand",100,0,50);
-  TH1F* hpk_minv_epem_all_pv=new TH1F("hpk_minv_epem_all_pv","M^{inv}_{e^{+} e^{-}} for all leptons from primary reaction for hParticleCand",1000,0,1000);
-  TH1F* hpk_minv_epem_all_pv_oa=new TH1F("hpk_minv_epem_all_pv_oa","M^{inv}_{e^{+} e^{-}} for all leptons from primary reaction for hParticleCand",1000,0,1000);
+  TH1F* hpk_minv_epem_all_pv=new TH1F("hpk_minv_epem_all_pv","M^{inv}_{e^{+} e^{-}} for all leptons from primary reaction for hParticleCand",nbin,0,maxE);
+  TH1F* hpk_minv_epem_all_pv_oa=new TH1F("hpk_minv_epem_all_pv_oa","M^{inv}_{e^{+} e^{-}} for all leptons from primary reaction for hParticleCand",nbin,0,maxE);
+  TH1F* hpk_eff_epem_all_pv_oa=new TH1F("hpk_eff_epem_all_pv_oa","Efficiency for all leptons from primary reaction for hParticleCand",nbin,0,maxE);
+  TH1F* hpk_minv_epem_all_pv_oa_pi=new TH1F("hpk_minv_epem_all_pv_oa_pi","M^{inv}_{e^{+} e^{-}} for leptons from primary reaction and #pi in HADES",nbin,0,maxE);
+  TH1F* hpk_eff_epem_all_pv_oa_pi=new TH1F("hpk_eff_epem_all_pv_oa_pi","Efficiency for leptons from primary reaction and #pi in HADES",nbin,0,maxE);
+  TH1F* hpk_minv_epem_all_pv_oa_pi_p=new TH1F("hpk_minv_epem_all_pv_oa_pi_p","M^{inv}_{e^{+} e^{-}} for leptons from primary reaction and #pi in HADES and p in HADES or FwDet",nbin,0,maxE);
+  TH1F* hpk_eff_epem_all_pv_oa_pi_p=new TH1F("hpk_eff_epem_all_pv_oa_pi_p","Efficiency for leptons from primary reaction and #pi in HADES and p in HADES or FwDet",nbin,0,maxE);
+  TH1F* hpk_minv_epem_all_pv_oa_pi_p_cut=new TH1F("hpk_minv_epem_all_pv_oa_pi_p_cut","M^{inv}_{e^{+} e^{-}} for leptons from primary reaction and #pi in HADES and p in HADES or FwDet",nbin,0,maxE);
   TH1F *hpk_ring_match_quolity=new TH1F("hpk_ring_match_quolity","Maching quality",100,0,20);  
-  TH1F *hpk_opening_angle=new TH1F("hpk_opening_angle","Openieng angle for e^{+} e^{-} pair",180,0,90);  
+  TH1F *hpk_opening_angle=new TH1F("hpk_opening_angle","Openieng angle for e^{+} e^{-} pair",180,0,90);
+
+  TH2F *hpkep_inAcceptance=new TH2F("hpkep_inAcceptance","e^{+} in HADES acceptance;p[MeV];#theta",100,0,1500,100,0,100);
+  TH2F *hpkem_inAcceptance=new TH2F("hpkem_inAcceptance","e^{-} in HADES acceptance;p[MeV];#theta",100,0,1500,100,0,100);
+
+
+  
+  const int zmin=-60;
+  const int zmax=800;
+  const int zn=200;
+  TH1F *hk_pim_vertex=new TH1F("hk_pim_vertex","Z-coordinate for #pi^{-} vertex, from hGeantKine",zn,zmin,zmax);
+  TH1F *hpk_pim_vertex=new TH1F("hpk_pim_vertex","Z-coordinate for #pi^{-} vertex, from hParticleCand",zn,zmin,zmax);
+  TH1F *hpk_pim_vertex_eff=new TH1F("hpk_pim_vertex_eff","#pi^{-} efficiency in function of Z vertex coordinate",zn,zmin,zmax);
+
+  TH1F *hk_pim_vertex_scan=new TH1F("hk_pim_vertex_scan","Z-coordinate for #pi^{-} vertex, from hGeantKine",zn,zmin,zmax);
+  TH1F *hpk_pim_vertex_scan=new TH1F("hpk_pim_vertex_scan","Z-coordinate for #pi^{-} vertex, from hParticleCand",zn,zmin,zmax);
+  TH1F *hpk_pim_vertex_eff_scan=new TH1F("hpk_pim_vertex_eff_scan","#pi^{-} efficiency in function of Z vertex coordinate",zn,zmin,zmax);
   //main loop
   for (Int_t i = 0; i < entries; i++)                   
     {
@@ -106,6 +145,8 @@ TH1F* hpk_particleid=new TH1F("hpk_particleid","ParticleID for hParticleCand",10
       //create containers to load data
       HParticleCandSim* particlecand =nullptr;
       HParticleCandSim* particlecand2 =nullptr;
+      HParticleCandSim* particlecand_pi =nullptr;
+      HParticleCandSim* particlecand_p =nullptr;
       HFwDetCandSim* fwdetstrawvec = nullptr;
       HGeantKine* kine=nullptr;
       HGeantKine* kine2=nullptr;
@@ -134,9 +175,23 @@ TH1F* hpk_particleid=new TH1F("hpk_particleid","ParticleID for hParticleCand",10
 	      kine = HCategoryManager::getObject(kine, fCatGeantKine,i);
 	      hk_particleid->Fill(kine->getID());
 
+	      if(getMotherIndex(kine)==18)
+		hk_particleid_L1116->Fill(kine->getID());
 	      if(kine->getMechanism() ==0)
 		hk_particleid_primary->Fill(kine->getID());
-
+	      if(kine->getID()==9 && getMotherIndex(kine)==18)//pi- from L1116
+		{
+		  Float_t vx;
+		  Float_t vy;
+		  Float_t vz;
+		  kine->getVertex(vx,vy,vz);
+		  hk_pim_vertex->Fill(vz);
+		  for(int n=0;n<=zn;n++)
+		    {
+		      if(vz<(double)zmin+(double)n*((double)zmax-(double)zmin)/(double)zn)
+			hk_pim_vertex_scan->Fill((double)zmin+(double)n*((double)zmax-(double)zmin)/(double)zn-0.0001);
+		    }
+		}
 	      for(int j=i;j<gknt;j++)//lepton 2
 		{
 		  
@@ -172,6 +227,7 @@ TH1F* hpk_particleid=new TH1F("hpk_particleid","ParticleID for hParticleCand",10
       if(fCatParticleCandSim)
 	{
 	  hpartn = fCatParticleCandSim->getEntries();//number of candidates in CatVectorCandSim
+	  int hpart_mult=0;
 	  for (int j = 0; j < hpartn; ++j)//lepton 1
 	    {
 	      particlecand = HCategoryManager::getObject(particlecand, fCatParticleCandSim, j);
@@ -180,8 +236,24 @@ TH1F* hpk_particleid=new TH1F("hpk_particleid","ParticleID for hParticleCand",10
 	      
 	      hpk_particleid->Fill(particlecand->getGeantPID());
 	      if(particlecand->getGeantCreationMechanism() ==0)
-		hpk_particleid_primary->Fill(particlecand->getGeantPID());
+		{
+		  hpk_particleid_primary->Fill(particlecand->getGeantPID());
+		  hpart_mult++;
+		}
+	      if(particlecand->getGeantCreationMechanism() ==0 && particlecand->getGeantPID()==2)//e+
+		hpkep_inAcceptance->Fill(particlecand->getGeantTotalMom(),particlecand->getTheta());
+	      if(particlecand->getGeantCreationMechanism() ==0 && particlecand->getGeantPID()==3)//e-
+		hpkem_inAcceptance->Fill(particlecand->getGeantTotalMom(),particlecand->getTheta());
+	      if(particlecand->getGeantPID()==9 && particlecand->getGeantParentPID()==18)//pi- from Lambda
+		{
+		  hpk_pim_vertex->Fill(particlecand->getGeantzVertex());
 
+		  for(int n=0;n<=zn;n++)
+		    {
+		      if(particlecand->getGeantzVertex()<(double)zmin+(double)n*((double)zmax-(double)zmin)/(double)zn)
+			hpk_pim_vertex_scan->Fill((double)zmin+(double)n*((double)zmax-(double)zmin)/(double)zn-0.0001);
+		    }
+		}
 	      for (int i = j; i < hpartn; ++i)//lepton 2
 		{
 		  particlecand2 = HCategoryManager::getObject(particlecand2, fCatParticleCandSim, i);
@@ -222,9 +294,47 @@ TH1F* hpk_particleid=new TH1F("hpk_particleid","ParticleID for hParticleCand",10
 		      hpk_opening_angle->Fill(oa_lepton);
 
 		      if(oa_lepton>4)
-			hpk_minv_epem_all_pv_oa->Fill(ldi.M());
-		    }
-		}
+			{
+			  hpk_minv_epem_all_pv_oa->Fill(ldi.M());
+
+			  for(int pi=0;pi < hpartn; ++pi)//pion in hades
+			    {
+			      particlecand_pi = HCategoryManager::getObject(particlecand_pi, fCatParticleCandSim, pi);
+
+			      if(!(particlecand_pi->isFlagBit(kIsUsed)
+				   && particlecand_pi->getGeantPID()==9
+				   && particlecand_pi->getGeantParentPID()==18))
+				continue;
+			      
+			      hpk_minv_epem_all_pv_oa_pi->Fill(ldi.M());
+			      for(int p=0;p < hpartn; ++p)//proton in hades
+				{
+				  particlecand_p = HCategoryManager::getObject(particlecand_p, fCatParticleCandSim, p);
+				  if(!(particlecand_p->isFlagBit(kIsUsed)
+				       && particlecand_p->getGeantPID()==14
+				       && particlecand_p->getGeantParentPID()==18))
+				    continue;
+				  hpk_minv_epem_all_pv_oa_pi_p->Fill(ldi.M());
+				}//end of p in hades
+
+			      if (fFwDetCandSim)//FwDet class
+				{
+				  vcnt = fFwDetCandSim->getEntries();//number of candidates in CatVectorCandSim
+				  for (int f = 0; f < vcnt; ++f)//proton in fwdet
+				    {
+				      fwdetstrawvec = HCategoryManager::getObject(fwdetstrawvec, fFwDetCandSim, f);
+				      if(!(//fwdetstrawvec->isFlagBit(kIsUsed)
+					    fwdetstrawvec->getGeantPID()==14
+					   && fwdetstrawvec->getGeantParentPID()==18))
+					continue;
+				      hpk_minv_epem_all_pv_oa_pi_p->Fill(ldi.M());
+				    }//end of proton in fwDet
+				}//end of Fwdet class
+			    }//end of pi
+			}// end of OA
+		    }//end of second lepton
+		}//end of first lepton
+	      hpk_mult->Fill(hpart_mult);
 	    }
 	}
         
@@ -236,7 +346,45 @@ TH1F* hpk_particleid=new TH1F("hpk_particleid","ParticleID for hParticleCand",10
   hk_minv_epem_all_pv->Draw();
   hk_minv_epem_all_pv_acc->Draw("same");
 
+   //calculate efficiency histograms
+
+  double scaleup=400/348;
+  hpk_eff_epem_all_pv_oa->Divide(hpk_minv_epem_all_pv_oa,hk_minv_epem_all_pv,1,scaleup);
+  hpk_eff_epem_all_pv_oa_pi->Divide(hpk_minv_epem_all_pv_oa_pi,hk_minv_epem_all_pv,1,scaleup);
+  hpk_eff_epem_all_pv_oa_pi_p->Divide(hpk_minv_epem_all_pv_oa_pi_p,hk_minv_epem_all_pv,1,scaleup);
+
+  hpk_pim_vertex_eff->Divide(hpk_pim_vertex,hk_pim_vertex,100.0/64.0,scaleup);
+  hpk_pim_vertex_eff_scan->Divide(hpk_pim_vertex_scan,hk_pim_vertex_scan,100.0/64.0,scaleup);
+
+  TCanvas* cZeff=new TCanvas("cZeff","cZeff");
+  cZeff->Divide(2);
+  cZeff->cd(1);
+  hk_pim_vertex->Draw();
+  hpk_pim_vertex->Draw("same");
+  cZeff->cd(2);
+  hpk_pim_vertex_eff->Draw();
+
+  cZeff->Write();
+
+  TCanvas* cZeff_scan=new TCanvas("cZeff_scan","cZeff_scan");
+  cZeff_scan->Divide(2);
+  cZeff_scan->cd(1);
+  hk_pim_vertex_scan->Draw();
+  hpk_pim_vertex_scan->Draw("same");
+  cZeff_scan->cd(2);
+  hpk_pim_vertex_eff_scan->Draw();
+
+  cZeff_scan->Write();
   
+  TCanvas* cLeptonAcceptance=new TCanvas("cLeptonAcceptance","Leptons' acceptance");
+  cLeptonAcceptance->Divide(2);
+  cLeptonAcceptance->cd(1);
+  hpkep_inAcceptance->Draw("colz"); 
+  cLeptonAcceptance->cd(2);
+  hpkem_inAcceptance->Draw("colz");
+
+  cLeptonAcceptance->Write();
+ 
   //save histograms
   output_file->Write();
   //output_file->Close();
