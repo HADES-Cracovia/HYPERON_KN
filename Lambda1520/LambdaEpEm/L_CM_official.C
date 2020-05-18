@@ -170,7 +170,7 @@ int sumSignals(TH1F* &histSum, TH1F** hists, int channels, int signal[])
   return 1;
 }
 
-int L_CM_pictures_M3_ver3()
+int L_CM_official()
 {
   const int fn=14;//number of files in "infile"
   const int signal_ch[]={1,8,9};//list of signal channels in "infile" file, starting from 0
@@ -182,9 +182,7 @@ int L_CM_pictures_M3_ver3()
   std::string file;
   //std::string directory="/lustre/nyx/hades/user/iciepal/Lambda1520_ic/";//directory comon for all files
   //std::string directory="./results_newGeometryM3_ver3_pi0/";//directory comon for all files
-  std::string directory="./results_official_old_ana/";
-  //std::string directory="./results_lambda_epem/";
-  //std::string directory="./results_official/";
+  std::string directory="./results_official/";
   int n=0;
   //write everything to file
   //TFile *MyFile = new TFile("output.root","recreate");
@@ -300,9 +298,10 @@ int L_CM_pictures_M3_ver3()
       hDLmassDistZL_epep[n]= (TH1F*)hist_file->Get("hDLmassDistZL_epep")->Clone();
       hDLmassDistZL_emem[n]= (TH1F*)hist_file->Get("hDLmassDistZL_emem")->Clone();
 
-      //hinvM_pmHpHDistZ_epem[n]= (TH1F*)hist_file->Get("hinvM_pmHpHDistZ_epem")->Clone();
-      //hinvM_pmHpFTDistZ_epem[n]=(TH1F*)hist_file->Get("hinvM_pmHpFTDistZ_epem")->Clone();
+      hinvM_pmHpHDistZ_epem[n]= (TH1F*)hist_file->Get("hinvM_pmHpHDistZ_epem")->Clone();
+      hinvM_pmHpFTDistZ_epem[n]=(TH1F*)hist_file->Get("hinvM_pmHpFTDistZ_epem")->Clone();
 
+      
       if(is_in(n,ur_background,4))//compensate wrong weight from pluto for certain channels
 	{
 	  //cout<<n<<" is o the list of channels with wrong weight"<<endl;
@@ -326,9 +325,10 @@ int L_CM_pictures_M3_ver3()
 
 	  hDLmassDistZL_epep[n]->Scale(1/8.065167e-10);
 	  hDLmassDistZL_emem[n]->Scale(1/8.065167e-10);
-	  //hinvM_pmHpHDistZ_epem[n]->Scale(1/8.065167e-10);
-	  //hinvM_pmHpFTDistZ_epem[n]->Scale(1/8.065167e-10);
-	}      
+	  hinvM_pmHpHDistZ_epem[n]->Scale(1/8.065167e-10);
+	  hinvM_pmHpFTDistZ_epem[n]->Scale(1/8.065167e-10);
+	}
+            
       //call Sumw2 for all histograms  
       /*
       hL1520massDistZLpi0[n]->Sumw2();
@@ -380,8 +380,8 @@ int L_CM_pictures_M3_ver3()
       sethist(hDLmassDistZL_emem[k],k,bins,1,fscale[k]);
       sethist(hDLmassDistZL_epep[k],k,bins,1,fscale[k]);
 
-      //sethist(hinvM_pmHpHDistZ_epem[k],k,1,1,fscale[k]);
-      //sethist(hinvM_pmHpFTDistZ_epem[k],k,1,1,fscale[k]);
+      sethist(hinvM_pmHpHDistZ_epem[k],k,1,1,fscale[k]);
+      sethist(hinvM_pmHpFTDistZ_epem[k],k,1,1,fscale[k]);
       
       //sum FW with HADES
       
@@ -411,8 +411,8 @@ int L_CM_pictures_M3_ver3()
   sumAll(hDLmass_background_epep, hDLmassDistZL_epep,fn,signal_ch);
   sumAll(hDLmass_sum,hDLmassDistZL,fn,signal_ch);
   sumAll(hDLmass_sum_right_vertex,hDLmassDistZL_L,fn,signal_ch);
-  //sumAll(hinvM_pmHpHDistZ_sum_epem,hinvM_pmHpHDistZ_epem,fn,signal_ch);
-  //sumAll(hinvM_pmHpFTDistZ_sum_epem,hinvM_pmHpFTDistZ_epem,fn,signal_ch);
+  sumAll(hinvM_pmHpHDistZ_sum_epem,hinvM_pmHpHDistZ_epem,fn,signal_ch);
+  sumAll(hinvM_pmHpFTDistZ_sum_epem,hinvM_pmHpFTDistZ_epem,fn,signal_ch);
   
   //hL1520mass_real_backgroud=(TH1F*)hL1520mass_background->Clone("hL1520mass_real_backgroud");
   //hL1520mass_real_backgroud->Reset();
@@ -429,8 +429,8 @@ int L_CM_pictures_M3_ver3()
   sumSignals(hL1520_delta,hL1520massDistZLpi0,fn,ur_background);
 
 
-  //hinvM_pmpDistZ_sum_epem=(TH1F*)hinvM_pmHpHDistZ_sum_epem->Clone("hinvM_pmpDistZ_sum_epem");
-  //hinvM_pmpDistZ_sum_epem->Add(hinvM_pmHpFTDistZ_sum_epem);
+  hinvM_pmpDistZ_sum_epem=(TH1F*)hinvM_pmHpHDistZ_sum_epem->Clone("hinvM_pmpDistZ_sum_epem");
+  hinvM_pmpDistZ_sum_epem->Add(hinvM_pmHpFTDistZ_sum_epem);
   
   cout<<"all histograms set"<<endl;
   
@@ -566,6 +566,7 @@ int L_CM_pictures_M3_ver3()
     hL1520mass_sum_all_signals->Add(sum_renormalize,1);
   
   hL1520mass_sum_all_signals->GetXaxis()->SetTitle("M_{#Lambda^{0} e^{+} e^{-}} [MeV]");
+  sum_renormalize->Draw("psame");
   hL1520mass_sum_all_signals->Draw("same");
   //hL1520mass_sum_all_signals->SetLineWidth(2);
   //hL1520mass_sum_all_signals->SetLineColor(kYellow-6);
@@ -586,7 +587,7 @@ int L_CM_pictures_M3_ver3()
 
   format_sumSignals(hL1520mass_sum_all_signals);
   
-  sum_renormalize->Draw("psame");
+  
   //CM_background->Draw("same");
   //CM_background->SetLineColor(kBlue);
   hL1520massDistZLpi0[1]->Draw("same");

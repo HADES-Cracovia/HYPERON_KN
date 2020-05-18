@@ -1,0 +1,14 @@
+find 001/*.root -size -100|wc -l
+find 004/*.root -size -100|wc -l
+find 040/*.root -size -100|wc -l
+find 042/*.root -size -100|wc -l
+find 044/*.root -size -100|wc -l
+find 048/*.root -size -100|wc -l
+find 049/*.root -size -100|wc -l
+find 050/*.root -size -100|wc -l
+find 052/*.root -size -100|wc -l
+find 055/*.root -size -100|wc -l
+find 056/*.root -size -100|wc -l
+find 057/*.root -size -100|wc -l
+find 058/*.root -size -100|wc -l
+find 062/*.root -size -100|wc -l

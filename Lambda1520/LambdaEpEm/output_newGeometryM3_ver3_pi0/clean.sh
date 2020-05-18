@@ -1,0 +1,14 @@
+find '*.root' 001/ -size -100 -delete
+find '*.root' 002/ -size -100 -delete
+find '*.root' 040/ -size -100 -delete
+find '*.root' 042/ -size -100 -delete
+find '*.root' 044/ -size -100 -delete
+find '*.root' 048/ -size -100 -delete
+find '*.root' 049/ -size -100 -delete
+find '*.root' 050/ -size -100 -delete
+find '*.root' 052/ -size -100 -delete
+find '*.root' 055/ -size -100 -delete
+find '*.root' 056/ -size -100 -delete
+find '*.root' 057/ -size -100 -delete
+find '*.root' 058/ -size -100 -delete
+find '*.root' 062/ -size -100 -delete
