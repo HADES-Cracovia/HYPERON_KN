@@ -108,15 +108,16 @@ void sethist(TH1F* hist, int color=1, int rebin=1, int style=1, double sc=1)
     hist->SetLineColor(color);
   else
     hist->SetLineColor(40);
-  //const double lum=1.5e31*7*60*60*24*28*0.5//0.5 because assumed duty-cycle, 7 because of PE target
-  const double lum=7.5/10*1.4e32*60*60*24*28*0.5; //factor 0.5 because assumed duty-cycle
+  //const double lum=1.5e31*7*60*60*24*28*0.5;//0.5 because assumed duty-cycle, 7 because of PE target
+  const double lum=1.5e31*60*60*24*28*0.5;//0.5 because assumed duty-cycle
+  //const double lum=7.5/10*1.4e32*60*60*24*28*0.5; //factor 0.5 because assumed duty-cycle
   //const double lum=2e31*60*60*24*28*0.5;  //double binW=hist->GetBinWidth(10); //After re-binning
   hist->SetLineStyle(style);
   hist->Scale(sc*lum*1e-30); //scailing to represent counts after whole beam-time, \mu b -> cm^2
   hist->Rebin(2);
   hist->Sumw2();
   //clean(hist);
-  scale(hist,1/lum*1e30);
+  scale(hist,1./lum*1e30);
   hist->Rebin(rebin);
   normalize(hist);//divide by the bin width
   hist->GetYaxis()->SetTitle("#frac{d #sigma}{d M} [#frac{#mu b}{MeV}]");
@@ -170,6 +171,29 @@ int sumSignals(TH1F* &histSum, TH1F** hists, int channels, int signal[])
   return 1;
 }
 
+void randomize(TH1F* hist_epem,TH1F* hist_hyp, TH1F* distribution_epem, TH1F* distribution_hyp, double n)
+{
+  double lum=1.5e31*60*60*24*28*0.5;//0.5 because assumed duty-cycle
+  hist_epem->Reset("ICES");
+  hist_hyp->Reset("ICES");
+  for(int j=0;j<n;j++)
+    {
+      double m_epem=distribution_epem->GetRandom();
+      hist_epem->Fill(m_epem);
+      if(m_epem>160)//cut on pi0 mass
+	hist_hyp->Fill(distribution_hyp->GetRandom());
+    }
+
+  
+  hist_epem->Sumw2();
+  hist_hyp->Sumw2();
+  hist_epem->Scale(1./lum*1e30);
+  normalize(hist_epem);
+  hist_hyp->Scale(1./lum*1e30);
+  normalize(hist_hyp);
+}
+
+
 int L_CM_pictures_M3_ver3()
 {
   const int fn=14;//number of files in "infile"
@@ -186,12 +210,7 @@ int L_CM_pictures_M3_ver3()
   //std::string directory="./results_lambda_epem/";
   //std::string directory="./results_official/";
   int n=0;
-  //write everything to file
-  //TFile *MyFile = new TFile("output.root","recreate");
-  //if ( MyFile->IsOpen() )
-  //printf("File opened successfully\n");
-
-  
+    
   const double scale_factor=50000*1000;
   const double dp_dalitz=4.5e-5;
   double fscale[]={
@@ -270,7 +289,7 @@ int L_CM_pictures_M3_ver3()
       cout<<file<<endl;
       
       const char* file_name=(directory+file).c_str();
-      TFile* hist_file=new TFile(file_name);
+      TFile* hist_file=new TFile(file_name,"READ");
       if(hist_file->IsZombie())
 	{
 	  cout<<"can't open a file!"<<endl<<file_name<<endl;
@@ -355,7 +374,7 @@ int L_CM_pictures_M3_ver3()
       n++;
     }
   //end of reading histograms*************************************************************************
-
+    
   //Print resoults************************************************************************************
   for(int k=0; k<n;k++)
     {
@@ -685,9 +704,9 @@ int L_CM_pictures_M3_ver3()
   hDLmass_sum_right_vertex->Draw("same");
   
   hDLmass_background_renolmalize->Draw("psame");
-    hDLmass_sum_all_signals->Draw("same");
+  hDLmass_sum_all_signals->Draw("same");
 
-   hDLmass_delta->Draw("same");
+  hDLmass_delta->Draw("same");
   //hDLmass_delta->SetLineWidth(3);
   
   hDLmassDistZL[signal_ch[1]]=renolmalize(hDLmassDistZL[signal_ch[1]],2); //rebin L1405
@@ -746,20 +765,76 @@ int L_CM_pictures_M3_ver3()
   cout<<"S/B ratio :"<< signal/background << endl;
   cout<<"significance (S/Sqrt(S+B))"<<signal/TMath::Sqrt(signal+background)<<endl;
 
-
+  /*
   TCanvas* cLambda=new TCanvas("cLambda","cLambda");
   cLambda->Divide(1);
   cLambda->cd(1);
   hinvM_pmpDistZ_sum_epem->Draw();
   hinvM_pmpDistZ_sum_epem->SetLineWidth(3);
   hinvM_pmpDistZ_sum_epem->SetLineColor(kGreen-2);
-  hinvM_pmHpHDistZ_sum_epem->Draw("same");
-  hinvM_pmHpHDistZ_sum_epem->SetLineWidth(3);
-  hinvM_pmHpHDistZ_sum_epem->SetLineColor(kRed);
+  //hinvM_pmHpHDistZ_sum_epem->Draw("same");
+  //hinvM_pmHpHDistZ_sum_epem->SetLineWidth(3);
+  //hinvM_pmHpHDistZ_sum_epem->SetLineColor(kRed);
   hinvM_pmHpFTDistZ_sum_epem->Draw("same");
   hinvM_pmHpFTDistZ_sum_epem->SetLineWidth(3);
-    
+  */
+  //randomize results according to statyustics
+  TH1F* hS_epem_L1520=hDLmassDistZL[signal_ch[0]]->Clone("hS_epem_L1520");
+  TH1F* hS_epem_S1385=hDLmassDistZL[signal_ch[2]]->Clone("hS_epem_S1385");
+  TH1F* hS_epem_D=hDLmass_delta->Clone("hS_epem_D");
+  TH1F* hS_epem_sum=hDLmass_sum_all_signals->Clone("hS_epem_sum");
+  TH1F* hS_epem_bg=hDLmass_background_renolmalize->Clone("hS_epem_bg");
+  TH1F* hS_Hip_L1520=hL1520massDistZLpi0[1]->Clone("hS_Hip_L1520");
+  TH1F* hS_Hip_S1385=hL1520massDistZLpi0[9]->Clone("hS_Hip_S1385");
+  TH1F* hS_Hip_D=hL1520_delta->Clone("hS_Hip_D");
+  TH1F* hS_Hip_sum=hL1520mass_sum_all_signals->Clone("hS_Hip_sum");
+  TH1F* hS_Hip_bg=sum_renormalize->Clone("hS_Hip_bg");
+  //void randomize(TH1F* hist_epem,TH1F* hist_hyp, TH1F* distribution_epem, TH1F* distribution_hyp, int n)
+  
+  randomize(hS_epem_L1520,hS_Hip_L1520,hDLmassDistZL[signal_ch[0]],hL1520massDistZLpi0[1],13*28);
+  randomize(hS_epem_S1385,hS_Hip_S1385,hDLmassDistZL[signal_ch[1]],hL1520massDistZLpi0[8],11*28);
+  randomize(hS_epem_D,hS_Hip_D,hDLmass_delta,hL1520_delta,13.*28.*1.011/1.168);//scaled to L1520
+  randomize(hS_epem_bg,hS_Hip_bg,hDLmass_background_renolmalize,sum_renormalize,13.*28.*8.82/1.17);//scalled to L1520
+  
+  hS_epem_sum->Reset("ICES");
+  hS_Hip_sum->Reset("ICES");
+
+  hS_epem_sum->Add(hS_epem_L1520);
+  hS_epem_sum->Add(hS_epem_S1385);
+  hS_epem_sum->Add(hS_epem_D);
+  hS_epem_sum->Add(hDLmass_sum_right_vertex);
+  hS_Hip_sum->Add(hS_Hip_L1520);
+  hS_Hip_sum->Add(hS_Hip_S1385);
+  hS_Hip_sum->Add(hS_Hip_D);
+  
+  TCanvas* cScaled_epem=new TCanvas("cScaled_epem","simulated randomize according to statistics");
+  hS_epem_sum->Draw();
+  hS_epem_L1520->Draw("same");
+  hS_epem_S1385->Draw("same");
+  hS_epem_D->Draw("same");
+  hS_epem_bg->Draw("same");
+  hDLmass_sum_right_vertex->Draw("same");  
+  gPad->SetLogy();
+  leg1->Draw("same");
+  
+  TCanvas* cScaled_Hip=new TCanvas("cScaled_Hip","cScaled_Hip");
+  hS_Hip_sum->Draw();
+  hS_Hip_L1520->Draw("same");
+  hS_Hip_S1385->Draw("same");
+  hS_Hip_D->Draw("same");
+  hS_Hip_bg->Draw("same");
   //end of printing results***************************************************************************
-    
+  //write everything to file
+  TFile *MyFile = new TFile("pictures_output.root","recreate");
+  if ( MyFile->IsOpen() )
+    printf("File opened successfully\n");
+
+  cFinalL1520->Write();
+  //cLambda->Write();
+  cFinalDL_cb->Write();
+  cScaled_Hip->Write();
+  cScaled_epem->Write();
+  MyFile->Write();
+  
   return 1;
 }
