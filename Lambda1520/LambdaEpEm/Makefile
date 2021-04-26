@@ -1,6 +1,6 @@
 
 APP_NAME      := anaLambda1520
-SOURCE_FILES  := analysis.cc angles_ana_old.cc #particleidentyf.cc 
+SOURCE_FILES  := analysis.cc angles_ana_c.cc #particleidentyf.cc 
 INSTALL_DIR   := .
 
 USES_RFIO     := no

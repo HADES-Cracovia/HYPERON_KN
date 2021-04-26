@@ -206,7 +206,8 @@ int L_CM_pictures_M3_ver3()
   std::string file;
   //std::string directory="/lustre/nyx/hades/user/iciepal/Lambda1520_ic/";//directory comon for all files
   //std::string directory="./results_newGeometryM3_ver3_pi0/";//directory comon for all files
-  std::string directory="./results_official_old_ana/";
+  //std::string directory="./results_official_old_ana/";
+  std::string directory="./results_L_to_B_ratio/";
   //std::string directory="./results_lambda_epem/";
   //std::string directory="./results_official/";
   int n=0;

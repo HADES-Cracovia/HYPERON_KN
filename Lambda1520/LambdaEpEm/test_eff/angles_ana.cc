@@ -121,10 +121,15 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   TH1F *hpk_ring_match_quolity=new TH1F("hpk_ring_match_quolity","Maching quality",100,0,20);  
   TH1F *hpk_opening_angle=new TH1F("hpk_opening_angle","Openieng angle for e^{+} e^{-} pair",180,0,90);
 
-  TH2F *hpkep_inAcceptance=new TH2F("hpkep_inAcceptance","e^{+} in HADES acceptance;p[MeV];#theta",100,0,1500,100,0,100);
-  TH2F *hpkem_inAcceptance=new TH2F("hpkem_inAcceptance","e^{-} in HADES acceptance;p[MeV];#theta",100,0,1500,100,0,100);
+  TH2F *hpkep_inAcceptance=new TH2F("hpkep_inAcceptance","e^{+} in HADES acceptance;p[MeV];#theta",100,0,1800,100,0,120);
+  TH2F *hpkem_inAcceptance=new TH2F("hpkem_inAcceptance","e^{-} in HADES acceptance;p[MeV];#theta",100,0,1800,100,0,120);
+  TH2F *hpkp_inAcceptance=new TH2F("hpkp_inAcceptance","p reconstructed in HADES;p[MeV];#theta",100,0,3500,100,0,120);
+  TH2F *hpkpim_inAcceptance=new TH2F("hpkpim_inAcceptance","#pi^{-} reconstructed in HADES;p[MeV];#theta",100,0,1000,100,0,120);
 
-
+  TH2F *hpkp_PLUTO=new TH2F("hpkp_PLUTO","p simulated in PLUTO;p[MeV];#theta",100,0,3500,100,0,120);
+  TH2F *hpkpim_PLUTO=new TH2F("hpkpim_PLUTO","#pi^{-} simulated in PLUTO;p[MeV];#theta",100,0,1000,100,0,120);
+  TH2F *hpkep_PLUTO=new TH2F("hpkep_PLUTO","e^{+} simulated in PLUTO;p[MeV];#theta",100,0,1800,100,0,120);
+  TH2F *hpkem_PLUTO=new TH2F("hpkem_PLUTO","e^{-} simulated in PLUTO;p[MeV];#theta",100,0,1800,100,0,120);
   
   const int zmin=-60;
   const int zmax=800;
@@ -136,6 +141,8 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   TH1F *hk_pim_vertex_scan=new TH1F("hk_pim_vertex_scan","Z-coordinate for #pi^{-} vertex, from hGeantKine",zn,zmin,zmax);
   TH1F *hpk_pim_vertex_scan=new TH1F("hpk_pim_vertex_scan","Z-coordinate for #pi^{-} vertex, from hParticleCand",zn,zmin,zmax);
   TH1F *hpk_pim_vertex_eff_scan=new TH1F("hpk_pim_vertex_eff_scan","#pi^{-} efficiency in function of Z vertex coordinate",zn,zmin,zmax);
+
+  TH1F *kpk_epem_vertex=new TH1F("kpk_epem_vertex","The z-coordinate of e^{+} e^{-} vertex",800,-200,200);
   //main loop
   for (Int_t i = 0; i < entries; i++)                   
     {
@@ -186,11 +193,24 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 		  Float_t vz;
 		  kine->getVertex(vx,vy,vz);
 		  hk_pim_vertex->Fill(vz);
+		  hpkpim_PLUTO->Fill(kine->getTotalMomentum(),kine->getThetaDeg());
 		  for(int n=0;n<=zn;n++)
 		    {
 		      if(vz<(double)zmin+(double)n*((double)zmax-(double)zmin)/(double)zn)
 			hk_pim_vertex_scan->Fill((double)zmin+(double)n*((double)zmax-(double)zmin)/(double)zn-0.0001);
 		    }
+		}
+	      if(kine->getID()==14 && getMotherIndex(kine)==18)//pi- from L1116
+		{
+		  hpkp_PLUTO->Fill(kine->getTotalMomentum(),kine->getThetaDeg());
+		}
+	      if(kine->getID()==2 && kine->getMechanism() ==0)//ep from L(1520)
+		{
+		  hpkep_PLUTO->Fill(kine->getTotalMomentum(),kine->getThetaDeg());
+		}
+	      if(kine->getID()==3 && kine->getMechanism() ==0)//em from L(1520)
+		{
+		  hpkem_PLUTO->Fill(kine->getTotalMomentum(),kine->getThetaDeg());
 		}
 	      for(int j=i;j<gknt;j++)//lepton 2
 		{
@@ -241,18 +261,28 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 		  hpart_mult++;
 		}
 	      if(particlecand->getGeantCreationMechanism() ==0 && particlecand->getGeantPID()==2)//e+
-		hpkep_inAcceptance->Fill(particlecand->getGeantTotalMom(),particlecand->getTheta());
+		{
+		  hpkep_inAcceptance->Fill(particlecand->getGeantTotalMom(),particlecand->getTheta());
+		  kpk_epem_vertex->Fill(particlecand->getGeantzVertex());
+		}
 	      if(particlecand->getGeantCreationMechanism() ==0 && particlecand->getGeantPID()==3)//e-
-		hpkem_inAcceptance->Fill(particlecand->getGeantTotalMom(),particlecand->getTheta());
+		{
+		  hpkem_inAcceptance->Fill(particlecand->getGeantTotalMom(),particlecand->getTheta());
+		  kpk_epem_vertex->Fill(particlecand->getGeantzVertex());
+		}
 	      if(particlecand->getGeantPID()==9 && particlecand->getGeantParentPID()==18)//pi- from Lambda
 		{
 		  hpk_pim_vertex->Fill(particlecand->getGeantzVertex());
-
+		  hpkpim_inAcceptance->Fill(particlecand->getGeantTotalMom(),particlecand->getTheta());
 		  for(int n=0;n<=zn;n++)
 		    {
 		      if(particlecand->getGeantzVertex()<(double)zmin+(double)n*((double)zmax-(double)zmin)/(double)zn)
 			hpk_pim_vertex_scan->Fill((double)zmin+(double)n*((double)zmax-(double)zmin)/(double)zn-0.0001);
 		    }
+		}
+	      if(particlecand->getGeantPID()==14 && particlecand->getGeantParentPID()==18)//p from Lambda
+		{
+		  hpkp_inAcceptance->Fill(particlecand->getGeantTotalMom(),particlecand->getTheta());
 		}
 	      for (int i = j; i < hpartn; ++i)//lepton 2
 		{
@@ -384,8 +414,29 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   hpkem_inAcceptance->Draw("colz");
 
   cLeptonAcceptance->Write();
- 
-  //save histograms
+
+  TCanvas* cHadronDist=new TCanvas("cHadronDist","cHadronDist");
+  cHadronDist->Divide(4,2);
+  cHadronDist->cd(1);
+  hpkp_inAcceptance->Draw("colz");
+  cHadronDist->cd(2);
+  hpkpim_inAcceptance->Draw("colz");
+  cHadronDist->cd(3);
+  hpkep_inAcceptance->Draw("colz");
+  cHadronDist->cd(4);
+  hpkem_inAcceptance->Draw("colz");
+  cHadronDist->cd(5);
+  hpkp_PLUTO->Draw("colz");
+  cHadronDist->cd(6);
+  hpkpim_PLUTO->Draw("colz");
+  cHadronDist->cd(7);
+  hpkep_PLUTO->Draw("colz");
+  cHadronDist->cd(8);
+  hpkem_PLUTO->Draw("colz");
+
+  cHadronDist->Write();
+
+  
   output_file->Write();
   //output_file->Close();
   cout << "writing root tree done" << endl;

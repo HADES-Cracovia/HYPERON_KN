@@ -182,7 +182,7 @@ int L_CM_official()
   std::string file;
   //std::string directory="/lustre/nyx/hades/user/iciepal/Lambda1520_ic/";//directory comon for all files
   //std::string directory="./results_newGeometryM3_ver3_pi0/";//directory comon for all files
-  std::string directory="./results_official/";
+  std::string directory="./results_official_old_ana/";
   int n=0;
   //write everything to file
   //TFile *MyFile = new TFile("output.root","recreate");

@@ -675,6 +675,8 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   TH2F *lepton_identyf_real_dtheta=new TH2F("lepton_identyf_real_dtheta","lepton_identyf_real_dtheta;dtheta;p[MeV]",200,-10,10,1000,0,2000);
   TH2F *lepton_identyf_ideal_dtheta=new TH2F("lepton_identyf_ideal_dtheta","lepton_identyf_ideal_dtheta;dtheta;p[MeV]",200,-10,10,1000,0,2000);
   TH1F *hSectorMult_DistZLpi0=new TH1F("hSectorMult_DistZLpi0","Sector multiplicity DistZLpi0",30,0,6);
+
+  TH1F *OA_angle=new TH1F("OA_angle","opening angle for leptons",100,0,20);
   //********************************************
 
   //TH1F* hinvMepemFT =new TH1F("hinvMepemFT","hinvMepemFT",1000,0,700);
@@ -780,7 +782,8 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
       double min_dist_dl=20; //[mm]
       double min_dist_l=20;
       double min_angle=4;//e+ e- opening angle [deg]
-
+      double min_z=-45.0+7.5;
+      
       HGeomVector base_Tg, dir_Tg;
 
       base_Tg.setX(0);
@@ -989,7 +992,7 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 		  h2LHvertex->Fill(vertexL.Z(),TMath::Sqrt(vertexL.X()*vertexL.X()+vertexL.Y()*vertexL.Y()));
 		}
 
-	      if (lambdaD<min_dist_l && vertexL.Z()>0.)
+	      if (lambdaD<min_dist_l && vertexL.Z()>min_z)
 		{
 		  flagHHL2=1;
 		  hinvM_pmHpHDistZ->Fill(lambdaM,ww);
@@ -1009,7 +1012,7 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 		  hZvertLamTgHH->Fill(ver_LTg.Z());
 
 		}
-	      if (lambdaM>1105 && lambdaM<1125 && lambdaD<min_dist_l && vertexL.Z()>0.)
+	      if (lambdaM>1105 && lambdaM<1125 && lambdaD<min_dist_l && vertexL.Z()>min_z)
 		{
 		  flagHHL4=1;
 
@@ -1305,6 +1308,7 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 		    int oaFlag=0;
 		    double oa = tool.getOpeningAngle(ep[s],em[ss]);
 		    double dilTrDist=trackDistance(ep[s],em[ss]);
+		    OA_angle->Fill(oa);
 		    if(oa>min_angle)oaFlag=1;
 
 
@@ -1519,28 +1523,28 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 	    //cout<<"::: "<<lambdaM<<endl;
 
 	    /*
-	          //recognize proton from FT origin------------
-		      //int tn=pFT[j]->getTrack();
-		          int tn;
-			      int kineID=-1;
-			          int kineparentID=-1;
-				      for(int p=0;p<knum;p++)
-				          {
-					      kine=HCategoryManager::getObject(kine, fCatGeantKine,p);
-					          int kineT=kine->getTrack();
-						      if(kineT==tn)
-						          {
-							      kineID=kine->getID();
-							          kineparentID=getMotherIndex(kine);
-								      break;
-								          }
-									      }
-									          if(kineID==14 && kineparentID==18)
-										      hFDdistanceLambda->Fill(lambdaD);
-										          if(kineID==14 && kineparentID!=18)
-											      hFDdistanceBg->Fill(lambdaD);
-											          //---------------------------------------
-												  */
+	                //recognize proton from FT origin------------
+			      //int tn=pFT[j]->getTrack();
+			                int tn;
+					      int kineID=-1;
+					                int kineparentID=-1;
+							      for(int p=0;p<knum;p++)
+							                {
+									      kine=HCategoryManager::getObject(kine, fCatGeantKine,p);
+									                int kineT=kine->getTrack();
+											      if(kineT==tn)
+											                {
+													      kineID=kine->getID();
+													                kineparentID=getMotherIndex(kine);
+															      break;
+															                }
+																	      }
+																	                if(kineID==14 && kineparentID==18)
+																			      hFDdistanceLambda->Fill(lambdaD);
+																			                if(kineID==14 && kineparentID!=18)
+																					hFDdistanceBg->Fill(lambdaD);
+																					//---------------------------------------
+																					  */
 
 
 	    if(pFT[j]->getGeantParentPID()==18 && pimH[k]->getGeantParentPID()==18)//proton and pion from L(1115)
@@ -1563,7 +1567,7 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 		  hLRmassFTDist->Fill(lambdaM,ww);
 	      }
 
-	    if (lambdaD<min_dist_l && vertexL.Z()>0.)
+	    if (lambdaD<min_dist_l && vertexL.Z()>min_z)
 	      {
 		flagHFTL2=1;
 		hinvM_pmHpFTDistZ->Fill(lambdaM,ww);
@@ -1585,7 +1589,7 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 		hdistTgLamFT->Fill(distLamZ);
 
 	      }
-	    if (lambdaM>1105 && lambdaM<1125 && lambdaD<min_dist_l && vertexL.Z()>0.)
+	    if (lambdaM>1105 && lambdaM<1125 && lambdaD<min_dist_l && vertexL.Z()>min_z)
 	      {
 
 		flagHFTL4=1;
@@ -2052,22 +2056,22 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
 
 	    }
 	  /*
-	        int fld=0;
-		    if(mech==0 && kineID==2)
-		        {
-			
-			    hEleptons4Pi->Fill(kine->getThetaDeg());
-			        h2Elepton4Pi->Fill(kine->getPhiDeg(),kine->getThetaDeg());
-				//fld=1;
-				}
-		        
-				if(mech==0 && kineID==3)
-				{
-				//if(fld)
-				h2Elepton4Pi->Fill(kine->getPhiDeg(),kine->getThetaDeg());
-				    
-				}
-				  */
+	            int fld=0;
+		        if(mech==0 && kineID==2)
+			        {
+				
+				    hEleptons4Pi->Fill(kine->getThetaDeg());
+				    h2Elepton4Pi->Fill(kine->getPhiDeg(),kine->getThetaDeg());
+				    //fld=1;
+				    }
+			        
+				    if(mech==0 && kineID==3)
+				    {
+				    //if(fld)
+				    h2Elepton4Pi->Fill(kine->getPhiDeg(),kine->getThetaDeg());
+				        
+				    }
+				      */
 	  if(kineID==14 && kineparentID==18)//proton from lambda
 	    {
 	      //h2IIprotons->Fill(kine->getTotalMomentum(),kine->getThetaDeg());
@@ -2405,6 +2409,8 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   lepton_identyf_real_dtheta->Write();
 
   hSectorMult_DistZLpi0->Write();
+
+  OA_angle->Write();
   /*
     TCanvas* c_identyf=new TCanvas("c_identyf","c_identyf");
     c_identyf->Divide(2,3);

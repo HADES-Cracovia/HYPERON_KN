@@ -2532,7 +2532,7 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   cEff->cd(12);
   h2Elepton4Pi->Draw("colz");
 
-  //cEff->Write();
+  cEff->Write();
   
   //*****************************
   
@@ -2553,7 +2553,7 @@ Int_t fwdet_tests(HLoop * loop, const AnaParameters & anapars)
   hEFLpionsEff->Divide(hEFLpionsdet,hEFLpions4Pi);
   hEFLpionsEff->Draw();
 
-  //cEffFromLambda->Write();
+  cEffFromLambda->Write();
   
 
 
